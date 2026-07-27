@@ -10,11 +10,11 @@ Status legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 ## A. Foundation / Setup
 
-- [ ] **F01 — Backend project scaffold**
+- [x] **F01 — Backend project scaffold**
   FastAPI app skeleton, folder structure (`app/api`, `app/models`,
   `app/scanner`), venv + `requirements.txt`, `uvicorn` running locally.
 
-- [ ] **F02 — Database connection & migrations**
+- [x] **F02 — Database connection & migrations**
   PostgreSQL connection config, SQLAlchemy models (or raw SQL), migration
   tool setup (e.g. Alembic), initial schema creation for all 5 tables.
 
