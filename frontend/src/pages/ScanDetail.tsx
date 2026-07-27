@@ -127,7 +127,7 @@ export default function ScanDetail() {
       )}
 
       <div style={{ marginTop: 24, display: "flex", gap: 12 }}>
-        <Link to="/" style={{ color: "var(--color-primary)" }}>Back to Dashboard</Link>
+        <Link to="/scans" style={{ color: "var(--color-primary)" }}>Back to Scans</Link>
         <button
           className="btn-danger"
           onClick={() => setShowConfirm(true)}

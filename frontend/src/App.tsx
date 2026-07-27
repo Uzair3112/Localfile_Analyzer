@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Sidebar from "./components/layout/Sidebar";
 import TopBar from "./components/layout/TopBar";
 import Dashboard from "./pages/Dashboard";
+import ScansList from "./pages/ScansList";
 import ScanDetail from "./pages/ScanDetail";
 import Duplicates from "./pages/Duplicates";
 import Todos from "./pages/Todos";
@@ -33,7 +34,7 @@ function AppLayout() {
         <main className="content">
           <Routes>
             <Route path="/" element={<Dashboard />} />
-            <Route path="/scans" element={<ScanDetail />} />
+            <Route path="/scans" element={<ScansList />} />
             <Route path="/scans/:scanId" element={<ScanDetail />} />
             <Route path="/duplicates" element={<Duplicates />} />
             <Route path="/todos" element={<Todos />} />
