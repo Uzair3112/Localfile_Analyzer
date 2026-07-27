@@ -14,8 +14,11 @@ from app.schemas.scan import (
     StartScanRequest,
     ScanResponse,
     ScanListResponse,
+    ScannedFileResponse,
+    ScannedFileListResponse,
 )
 from app.scanner.runner import run_scan
+from app.models.scanned_file import ScannedFile
 
 router = APIRouter(prefix="/scans", tags=["scans"])
 
@@ -139,3 +142,50 @@ async def delete_scan(
     await db.delete(scan)
     await db.commit()
     return {"status": "deleted", "scan_id": scan_id}
+
+
+@router.get("/{scan_id}/files")
+async def get_scan_files(
+    scan_id: int,
+    page: int = 1,
+    page_size: int = 50,
+    extension: str | None = None,
+    search: str | None = None,
+    sort: str = "filename",
+    order: str = "asc",
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(Scan).where(Scan.id == scan_id))
+    scan = result.scalar_one_or_none()
+    if not scan:
+        return _error_response("SCAN_NOT_FOUND", f"No scan exists with id {scan_id}", status=404)
+
+    query = select(ScannedFile).where(ScannedFile.scan_id == scan_id)
+
+    if extension:
+        query = query.where(ScannedFile.extension == extension)
+    if search:
+        query = query.where(
+            ScannedFile.filename.ilike(f"%{search}%")
+            | ScannedFile.full_path.ilike(f"%{search}%")
+        )
+
+    count_query = select(func.count()).select_from(query.subquery())
+    count_result = await db.execute(count_query)
+    total = count_result.scalar() or 0
+
+    sort_col = getattr(ScannedFile, sort, ScannedFile.filename)
+    if order == "desc":
+        sort_col = sort_col.desc()
+    else:
+        sort_col = sort_col.asc()
+    query = query.order_by(sort_col).offset((page - 1) * page_size).limit(page_size)
+
+    rows = (await db.execute(query)).scalars().all()
+
+    return ScannedFileListResponse(
+        files=[ScannedFileResponse.model_validate(f) for f in rows],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )

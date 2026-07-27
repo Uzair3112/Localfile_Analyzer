@@ -67,35 +67,35 @@ Status legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 ## C. Recursive Scanner Engine
 
-- [ ] **F13 — Recursive directory walker**
+- [x] **F13 — Recursive directory walker**
   Traverses the selected folder tree, applying ignore rules at
   descend-time (not post-hoc filtering).
 
-- [ ] **F14 — Ignore rules: hidden files**
+- [x] **F14 — Ignore rules: hidden files**
   `ignore_hidden` setting excludes dotfiles/dotfolders from the walk.
 
-- [ ] **F15 — Ignore rules: node_modules**
+- [x] **F15 — Ignore rules: node_modules**
   `ignore_node_modules` setting excludes `node_modules` directories from
   the walk.
 
-- [ ] **F16 — Ignore rules: max file size**
+- [x] **F16 — Ignore rules: max file size**
   `max_file_size` setting skips files above the configured threshold.
 
-- [ ] **F17 — Ignore rules: custom globs** *(stretch)*
+- [x] **F17 — Ignore rules: custom globs** *(stretch)*
   User-defined glob patterns (e.g. `*.log`, `dist/`) excluded from scans.
 
-- [ ] **F18 — File metadata collection**
+- [x] **F18 — File metadata collection**
   For each included file: filename, full path, extension, size,
   created/modified timestamps.
 
-- [ ] **F19 — Text-file detection**
+- [x] **F19 — Text-file detection**
   Detect text vs. binary files (UTF-8 decode attempt on first N bytes) to
   decide whether line-counting/TODO-scanning applies.
 
-- [ ] **F20 — Line counting**
+- [x] **F20 — Line counting**
   Count lines for detected text/code files; store as `line_count`.
 
-- [ ] **F21 — Batch DB writes**
+- [x] **F21 — Batch DB writes**
   Accumulate scanned-file rows in memory and flush in batches (~500) for
   performance on large folders.
 

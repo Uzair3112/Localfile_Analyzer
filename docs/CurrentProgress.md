@@ -54,15 +54,15 @@
 
 ## C. Recursive Scanner Engine
 
-- `[ ]` **F13** — Recursive directory walker
-- `[ ]` **F14** — Ignore rules: hidden files
-- `[ ]` **F15** — Ignore rules: node_modules
-- `[ ]` **F16** — Ignore rules: max file size
-- `[ ]` **F17** — Ignore rules: custom globs *(stretch)*
-- `[ ]` **F18** — File metadata collection
-- `[ ]` **F19** — Text-file detection
-- `[ ]` **F20** — Line counting
-- `[ ]` **F21** — Batch DB writes
+- `[x]` **F13** — Recursive directory walker
+- `[x]` **F14** — Ignore rules: hidden files
+- `[x]` **F15** — Ignore rules: node_modules
+- `[x]` **F16** — Ignore rules: max file size
+- `[x]` **F17** — Ignore rules: custom globs *(stretch)*
+- `[x]` **F18** — File metadata collection
+- `[x]` **F19** — Text-file detection
+- `[x]` **F20** — Line counting
+- `[x]` **F21** — Batch DB writes
 
 ---
 
@@ -158,7 +158,7 @@ Localfile_Analyzer/
 │   │   │   ├── router.py           # mounts /api/v1/health, /scans, /settings
 │   │   │   ├── health.py           # GET /api/v1/health
 │   │   │   ├── scans.py            # POST/GET/DELETE /scans with background runner
-│   │   │   └── settings.py         # stub
+│   │   │   └── settings.py         # GET/PUT /settings with custom_ignore_globs
 │   │   ├── models/
 │   │   │   ├── __init__.py         # Base + all model exports
 │   │   │   ├── scan.py             # Scan ORM model (with ScanStatus enum)
@@ -168,11 +168,12 @@ Localfile_Analyzer/
 │   │   │   └── scan_settings.py    # ScanSettings
 │   │   └── scanner/
 │   │       ├── __init__.py
-│   │       ├── runner.py           # background walk + count + failure handling
-│   │       ├── walker.py           # stub
-│   │       ├── hasher.py           # stub
-│   │       ├── line_counter.py     # stub
-│   │       └── todo_finder.py      # stub
+│   │       ├── runner.py           # orchestrator: walk → metadata → batch DB insert
+│   │       ├── walker.py           # recursive walker with os.scandir + descend-time filtering
+│   │       ├── ignore_rules.py     # should_ignore_path (hidden, node_modules, custom globs)
+│   │       ├── hasher.py           # stub (for F22+)
+│   │       ├── line_counter.py     # is_text_file + count_lines
+│   │       └── todo_finder.py      # stub (for F26+)
 │   ├── alembic/
 │   │   ├── env.py                  # configured with app models
 │   │   ├── script.py.mako

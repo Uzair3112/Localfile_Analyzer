@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useScanPolling } from "../hooks/useScanPolling";
 import { api } from "../api/client";
+import type { ScannedFile } from "../api/types";
 
 function formatBytes(bytes: number): string {
   if (bytes === 0) return "0 B";
@@ -14,6 +15,9 @@ function formatNumber(n: number): string {
   return n.toLocaleString();
 }
 
+const PAGE_SIZE = 50;
+const EXTENSIONS = ["", ".py", ".js", ".ts", ".md", ".json", ".html", ".css", ".txt", ".yml", ".yaml", ".sh"];
+
 export default function ScanDetail() {
   const { scanId } = useParams<{ scanId: string }>();
   const navigate = useNavigate();
@@ -22,6 +26,46 @@ export default function ScanDetail() {
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  const [files, setFiles] = useState<ScannedFile[]>([]);
+  const [filesTotal, setFilesTotal] = useState(0);
+  const [filesPage, setFilesPage] = useState(1);
+  const [filesLoading, setFilesLoading] = useState(false);
+  const [filesError, setFilesError] = useState<string | null>(null);
+  const [fileSearch, setFileSearch] = useState("");
+  const [fileExt, setFileExt] = useState("");
+  const [fileSort, setFileSort] = useState("filename");
+  const [fileOrder, setFileOrder] = useState("asc");
+  const [showSettings, setShowSettings] = useState(false);
+  const [overrideHidden, setOverrideHidden] = useState(true);
+  const [overrideNodeModules, setOverrideNodeModules] = useState(true);
+  const [overrideMaxSize, setOverrideMaxSize] = useState(52428800);
+
+  const fetchFiles = useCallback(async () => {
+    if (!id || scan?.status !== "completed") return;
+    setFilesLoading(true);
+    setFilesError(null);
+    try {
+      const data = await api.getScanFiles(id, {
+        page: filesPage,
+        page_size: PAGE_SIZE,
+        extension: fileExt || undefined,
+        search: fileSearch || undefined,
+        sort: fileSort,
+        order: fileOrder,
+      });
+      setFiles(data.files);
+      setFilesTotal(data.total);
+    } catch (err) {
+      setFilesError(err instanceof Error ? err.message : "Failed to load files");
+    } finally {
+      setFilesLoading(false);
+    }
+  }, [id, scan?.status, filesPage, fileExt, fileSearch, fileSort, fileOrder]);
+
+  useEffect(() => {
+    fetchFiles();
+  }, [fetchFiles]);
 
   const handleDelete = async () => {
     if (!id) return;
@@ -36,6 +80,16 @@ export default function ScanDetail() {
       setDeleting(false);
       setShowConfirm(false);
     }
+  };
+
+  const handleSort = (col: string) => {
+    if (fileSort === col) {
+      setFileOrder(fileOrder === "asc" ? "desc" : "asc");
+    } else {
+      setFileSort(col);
+      setFileOrder("asc");
+    }
+    setFilesPage(1);
   };
 
   if (!id) {
@@ -83,6 +137,13 @@ export default function ScanDetail() {
     : scan.status === "failed" ? "failed"
     : "pending";
 
+  const totalPages = Math.ceil(filesTotal / PAGE_SIZE);
+
+  const sortIndicator = (col: string) => {
+    if (fileSort !== col) return "";
+    return fileOrder === "asc" ? " ▲" : " ▼";
+  };
+
   return (
     <div className="page">
       <div className="scan-detail-header">
@@ -122,12 +183,49 @@ export default function ScanDetail() {
         </div>
       )}
 
+      {/* Per-scan settings override dialog */}
+      {showSettings && (
+        <div className="dialog-overlay" onClick={() => setShowSettings(false)}>
+          <div className="dialog" onClick={(e) => e.stopPropagation()}>
+            <h2 className="dialog-title">Scan Settings Override</h2>
+            <div className="dialog-body" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <label className="dialog-label">
+                <input type="checkbox" checked={overrideHidden} onChange={(e) => setOverrideHidden(e.target.checked)} />
+                {" "}Ignore hidden files
+              </label>
+              <label className="dialog-label">
+                <input type="checkbox" checked={overrideNodeModules} onChange={(e) => setOverrideNodeModules(e.target.checked)} />
+                {" "}Ignore node_modules
+              </label>
+              <label className="dialog-label">
+                Max file size (bytes)
+                <input
+                  type="number"
+                  className="settings-input"
+                  value={overrideMaxSize}
+                  onChange={(e) => setOverrideMaxSize(Number(e.target.value))}
+                  style={{ marginTop: 4 }}
+                />
+              </label>
+            </div>
+            <div className="dialog-actions">
+              <button className="btn-secondary" onClick={() => setShowSettings(false)}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {deleteError && (
         <div className="scan-error-message" style={{ marginTop: 12 }}>{deleteError}</div>
       )}
 
       <div style={{ marginTop: 24, display: "flex", gap: 12 }}>
         <Link to="/scans" style={{ color: "var(--color-primary)" }}>Back to Scans</Link>
+        {scan.status === "completed" && (
+          <button className="btn-secondary" onClick={() => setShowSettings(true)} style={{ fontSize: 13 }}>
+            View Settings Used
+          </button>
+        )}
         <button
           className="btn-danger"
           onClick={() => setShowConfirm(true)}
@@ -157,6 +255,113 @@ export default function ScanDetail() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* File table — only after scan completes */}
+      {scan.status === "completed" && (
+        <div style={{ marginTop: 32 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 8 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>
+              Files
+              <span style={{ fontSize: 14, fontWeight: 400, color: "var(--color-text-muted)", marginLeft: 8 }}>
+                ({filesTotal} total)
+              </span>
+            </h2>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <select
+                className="file-table-filter"
+                value={fileExt}
+                onChange={(e) => { setFileExt(e.target.value); setFilesPage(1); }}
+              >
+                <option value="">All extensions</option>
+                {EXTENSIONS.filter(Boolean).map((ext) => (
+                  <option key={ext} value={ext}>{ext}</option>
+                ))}
+              </select>
+              <input
+                className="file-table-filter"
+                type="text"
+                placeholder="Search files..."
+                value={fileSearch}
+                onChange={(e) => { setFileSearch(e.target.value); setFilesPage(1); }}
+                style={{ width: 180 }}
+              />
+            </div>
+          </div>
+
+          {filesLoading ? (
+            <p style={{ color: "var(--color-text-muted)", padding: 20 }}>Loading files...</p>
+          ) : filesError ? (
+            <div className="scan-error-message">{filesError}</div>
+          ) : files.length === 0 ? (
+            <p style={{ color: "var(--color-text-muted)", padding: 20 }}>
+              {fileSearch || fileExt ? "No files match the current filters." : "No files found in this scan."}
+            </p>
+          ) : (
+            <>
+              <div className="file-table-wrapper">
+                <table className="file-table">
+                  <thead>
+                    <tr>
+                      <th className="file-table-sortable" onClick={() => handleSort("filename")}>
+                        Filename{sortIndicator("filename")}
+                      </th>
+                      <th className="file-table-sortable" onClick={() => handleSort("extension")}>
+                        Type{sortIndicator("extension")}
+                      </th>
+                      <th className="file-table-sortable" onClick={() => handleSort("size")}>
+                        Size{sortIndicator("size")}
+                      </th>
+                      <th className="file-table-sortable" onClick={() => handleSort("line_count")}>
+                        Lines{sortIndicator("line_count")}
+                      </th>
+                      <th className="file-table-sortable" onClick={() => handleSort("modified_at")}>
+                        Modified{sortIndicator("modified_at")}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {files.map((f) => (
+                      <tr key={f.id} className="file-table-row" title={f.full_path}>
+                        <td className="file-table-filename">{f.filename}</td>
+                        <td><span className="file-ext-badge">{f.extension || "-"}</span></td>
+                        <td>{formatBytes(f.size)}</td>
+                        <td>{f.line_count != null ? formatNumber(f.line_count) : <span className="file-table-null">-</span>}</td>
+                        <td className="file-table-date">
+                          {f.modified_at ? new Date(f.modified_at).toLocaleDateString() : "-"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {totalPages > 1 && (
+                <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 16, alignItems: "center" }}>
+                  <button
+                    className="btn-secondary"
+                    disabled={filesPage <= 1}
+                    onClick={() => setFilesPage((p) => Math.max(1, p - 1))}
+                    style={{ padding: "6px 14px", fontSize: 13 }}
+                  >
+                    Previous
+                  </button>
+                  <span style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
+                    Page {filesPage} of {totalPages}
+                  </span>
+                  <button
+                    className="btn-secondary"
+                    disabled={filesPage >= totalPages}
+                    onClick={() => setFilesPage((p) => p + 1)}
+                    style={{ padding: "6px 14px", fontSize: 13 }}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
+          )}
         </div>
       )}
     </div>

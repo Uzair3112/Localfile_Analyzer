@@ -37,6 +37,20 @@ export interface ScannedFile {
   modified_at: string | null;
 }
 
+export interface ScannedFileListResponse {
+  files: ScannedFile[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface SettingsResponse {
+  ignore_hidden: boolean;
+  ignore_node_modules: boolean;
+  max_file_size: number;
+  custom_ignore_globs: string[];
+}
+
 export interface Todo {
   id: number;
   file_id: number;
