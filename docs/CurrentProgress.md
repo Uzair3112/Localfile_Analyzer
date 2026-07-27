@@ -1,6 +1,6 @@
 # Current Progress — Local File Analyzer
 
-**Last updated:** 2026-07-27
+ **Last updated:** 2026-07-27 (updated after Phase B implementation)
 
 ---
 
@@ -48,7 +48,7 @@
 - `[x]` **F09** — Scan status polling
 - `[x]` **F10** — Scan completion & totals
 - `[x]` **F11** — Scan failure handling
-- `[ ]` **F12** — Delete scan
+- `[x]` **F12** — Delete scan
 
 ---
 
@@ -140,29 +140,35 @@ Localfile_Analyzer/
 │   ├── features.md
 │   ├── CurrentProgress.md          ← this file
 │   └── plan/
-│       └── Foundation-F01-F02-plan.md
+│       ├── Foundation-F01-F02-plan.md
+│       ├── Foundation-F03-F04-F05-plan.md
+│       ├── B-F06-F08-scan-lifecycle-plan.md
+│       └── B-F09-F12-scan-lifecycle-plan.md
 ├── backend/
 │   ├── app/
 │   │   ├── __init__.py
 │   │   ├── main.py                 # FastAPI app factory with lifespan + CORS
 │   │   ├── config.py               # pydantic-settings (DATABASE_URL, etc.)
 │   │   ├── database.py             # async engine, session, health check
+│   │   ├── schemas/
+│   │   │   ├── __init__.py
+│   │   │   └── scan.py             # Pydantic request/response models
 │   │   ├── api/
 │   │   │   ├── __init__.py
 │   │   │   ├── router.py           # mounts /api/v1/health, /scans, /settings
 │   │   │   ├── health.py           # GET /api/v1/health
-│   │   │   ├── scans.py            # stub
+│   │   │   ├── scans.py            # POST/GET/DELETE /scans with background runner
 │   │   │   └── settings.py         # stub
 │   │   ├── models/
 │   │   │   ├── __init__.py         # Base + all model exports
-│   │   │   ├── scan.py             # Scan
+│   │   │   ├── scan.py             # Scan ORM model (with ScanStatus enum)
 │   │   │   ├── scanned_file.py     # ScannedFile
 │   │   │   ├── todo.py             # Todo
 │   │   │   ├── duplicate.py        # Duplicate
 │   │   │   └── scan_settings.py    # ScanSettings
 │   │   └── scanner/
 │   │       ├── __init__.py
-│   │       ├── runner.py           # stub
+│   │       ├── runner.py           # background walk + count + failure handling
 │   │       ├── walker.py           # stub
 │   │       ├── hasher.py           # stub
 │   │       ├── line_counter.py     # stub
@@ -175,39 +181,44 @@ Localfile_Analyzer/
 │   ├── alembic.ini
 │   ├── .env
 │   ├── .gitignore
-│   ├── requirements.txt            # includes pydantic-settings, psycopg2-binary
+│   ├── requirements.txt
 │   └── venv/                       # (gitignored)
 ├── README.md                       # Root project setup guide
 └── frontend/
     ├── src-tauri/                  # Tauri shell (Rust)
-    │   ├── src/lib.rs              # shell plugin registered
-    │   └── Cargo.toml              # tauri-plugin-shell added
+    │   ├── src/lib.rs              # shell + dialog plugins registered
+    │   ├── Cargo.toml              # tauri-plugin-shell, tauri-plugin-dialog
+    │   └── capabilities/
+    │       └── default.json        # permissions for dialog, opener, core
     ├── src/                        # React app
-    │   ├── App.tsx                 # Layout + BrowserRouter + health check
-    │   ├── App.css                 # Layout styles (sidebar, topbar, content)
+    │   ├── App.tsx                 # Layout + BrowserRouter + health check + routes
+    │   ├── App.css                 # Layout + dialog + scan detail styles
     │   ├── theme.css               # CSS custom properties (colors, radii)
     │   ├── api/
-    │   │   ├── client.ts           # Typed fetch wrapper
+    │   │   ├── client.ts           # Typed fetch wrapper + scan/delete calls
     │   │   └── types.ts            # Shared TypeScript interfaces
     │   ├── pages/
     │   │   ├── Dashboard.tsx
-    │   │   ├── ScanDetail.tsx
+    │   │   ├── ScanDetail.tsx      # Scan status, stats, delete button
     │   │   ├── Duplicates.tsx
     │   │   ├── Todos.tsx
     │   │   └── Settings.tsx
     │   ├── components/
     │   │   ├── layout/
     │   │   │   ├── Sidebar.tsx     # Nav links + active highlighting
-    │   │   │   └── TopBar.tsx      # Title + New Scan button
+    │   │   │   └── TopBar.tsx      # New Scan button → folder picker → dialog
     │   │   ├── shared/
     │   │   │   ├── Badge.tsx
     │   │   │   └── ProgressBar.tsx
     │   │   └── scan/
-    │   │       └── ScanStatusBadge.tsx
+    │   │       ├── ScanStatusBadge.tsx
+    │   │       └── NewScanDialog.tsx  # Confirmation dialog before starting scan
     │   └── hooks/
-    │       └── useScans.ts
+    │       ├── useScans.ts
+    │       ├── useScanPolling.ts   # Polls GET /scans/{id} every 1.5s
+    │       └── useFolderPicker.ts  # Tauri native folder dialog hook
     ├── package.json
-    └── README.md                   # Points to root README
+    └── README.md
 ```
 
 ---
@@ -218,11 +229,19 @@ Localfile_Analyzer/
 # Terminal 1: Backend
 cd backend
 .\venv\Scripts\Activate.ps1
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 
-# Terminal 2: Frontend
+# Terminal 2: Frontend (browser dev mode)
 cd frontend
 npm run dev
-# -> http://localhost:1420 (sidebar + routing visible)
-# -> Console log: "Backend connected: {status: 'ok', db: 'connected'}"
+# -> http://localhost:1420 (use for UI-only testing without folder picker)
+
+# Or: Frontend (Tauri native app)
+cd frontend
+npm run tauri dev
+# -> opens native window with full folder picker support
+
+# Verify backend health
+curl.exe http://127.0.0.1:8000/api/v1/health
+# -> {"status":"ok","db":"connected"}
 ```

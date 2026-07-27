@@ -124,3 +124,18 @@ async def list_scans(
         page=page,
         page_size=page_size,
     )
+
+
+@router.delete("/{scan_id}")
+async def delete_scan(
+    scan_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(Scan).where(Scan.id == scan_id))
+    scan = result.scalar_one_or_none()
+    if not scan:
+        return _error_response("SCAN_NOT_FOUND", f"No scan exists with id {scan_id}", status=404)
+
+    await db.delete(scan)
+    await db.commit()
+    return {"status": "deleted", "scan_id": scan_id}

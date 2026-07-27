@@ -59,7 +59,7 @@ Status legend: `[ ]` not started · `[~]` in progress · `[x]` done
   continue); scan-level failure sets `status=failed` with
   `error_message`.
 
-- [ ] **F12 — Delete scan**
+- [x] **F12 — Delete scan**
   `DELETE /scans/{id}` removes the scan and cascades to all related rows
   (files, todos, duplicates).
 

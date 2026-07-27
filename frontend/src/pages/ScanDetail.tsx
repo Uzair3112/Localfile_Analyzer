@@ -1,5 +1,7 @@
-import { useParams, Link } from "react-router-dom";
+import { useState } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useScanPolling } from "../hooks/useScanPolling";
+import { api } from "../api/client";
 
 function formatBytes(bytes: number): string {
   if (bytes === 0) return "0 B";
@@ -14,8 +16,27 @@ function formatNumber(n: number): string {
 
 export default function ScanDetail() {
   const { scanId } = useParams<{ scanId: string }>();
+  const navigate = useNavigate();
   const id = scanId ? parseInt(scanId, 10) : null;
   const { scan, loading, error } = useScanPolling(id);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const handleDelete = async () => {
+    if (!id) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await api.deleteScan(id);
+      navigate("/");
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "Failed to delete scan");
+    } finally {
+      setDeleting(false);
+      setShowConfirm(false);
+    }
+  };
 
   if (!id) {
     return (
@@ -37,7 +58,7 @@ export default function ScanDetail() {
     );
   }
 
-  if (error) {
+  if (error && !scan) {
     return (
       <div className="page">
         <h1>Scan #{id}</h1>
@@ -101,9 +122,43 @@ export default function ScanDetail() {
         </div>
       )}
 
-      <Link to="/" style={{ display: "inline-block", marginTop: 24, color: "var(--color-primary)" }}>
-        Back to Dashboard
-      </Link>
+      {deleteError && (
+        <div className="scan-error-message" style={{ marginTop: 12 }}>{deleteError}</div>
+      )}
+
+      <div style={{ marginTop: 24, display: "flex", gap: 12 }}>
+        <Link to="/" style={{ color: "var(--color-primary)" }}>Back to Dashboard</Link>
+        <button
+          className="btn-danger"
+          onClick={() => setShowConfirm(true)}
+          disabled={deleting || scan.status === "running"}
+          style={{ marginLeft: "auto" }}
+        >
+          {deleting ? "Deleting..." : "Delete Scan"}
+        </button>
+      </div>
+
+      {showConfirm && (
+        <div className="dialog-overlay" onClick={() => setShowConfirm(false)}>
+          <div className="dialog" onClick={(e) => e.stopPropagation()}>
+            <h2 className="dialog-title">Delete Scan #{scan.scan_id}?</h2>
+            <div className="dialog-body">
+              <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>
+                This will permanently remove this scan and all its data (files, duplicates, todos).
+              </p>
+            </div>
+            {deleteError && <div className="dialog-error">{deleteError}</div>}
+            <div className="dialog-actions">
+              <button className="btn-secondary" onClick={() => setShowConfirm(false)} disabled={deleting}>
+                Cancel
+              </button>
+              <button className="btn-danger" onClick={handleDelete} disabled={deleting}>
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
