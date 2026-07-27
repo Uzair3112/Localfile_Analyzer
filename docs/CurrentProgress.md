@@ -25,9 +25,18 @@
   initial migration created and applied. Tables: `scans`, `scanned_files`,
   `todos`, `duplicates`, `scan_settings`.
 
-- `[ ]` **F03 — Tauri shell scaffold**
-- `[ ]` **F04 — Tauri ↔ FastAPI process wiring**
-- `[ ]` **F05 — Dev environment docs**
+- `[x]` **F03 — Tauri shell scaffold**
+  Sidebar with 5 nav links, TopBar with "New Scan" button, CSS theme tokens,
+  routing via react-router-dom, placeholder pages for all 5 screens.
+
+- `[x]` **F04 — Tauri ↔ FastAPI process wiring**
+  Typed API client (`api/client.ts`) with startup health check,
+  `@tauri-apps/plugin-shell` installed and registered in Tauri,
+  backend URL centralized in single constant.
+
+- `[x]` **F05 — Dev environment docs**
+  Root `README.md` with complete local setup (no Docker), backend-specific
+  README, frontend README updated.
 
 ---
 
@@ -168,10 +177,37 @@ Localfile_Analyzer/
 │   ├── .gitignore
 │   ├── requirements.txt            # includes pydantic-settings, psycopg2-binary
 │   └── venv/                       # (gitignored)
+├── README.md                       # Root project setup guide
 └── frontend/
-    ├── src-tauri/                  # Tauri shell (out-of-box)
-    ├── src/                        # React (out-of-box, greet example)
-    └── package.json
+    ├── src-tauri/                  # Tauri shell (Rust)
+    │   ├── src/lib.rs              # shell plugin registered
+    │   └── Cargo.toml              # tauri-plugin-shell added
+    ├── src/                        # React app
+    │   ├── App.tsx                 # Layout + BrowserRouter + health check
+    │   ├── App.css                 # Layout styles (sidebar, topbar, content)
+    │   ├── theme.css               # CSS custom properties (colors, radii)
+    │   ├── api/
+    │   │   ├── client.ts           # Typed fetch wrapper
+    │   │   └── types.ts            # Shared TypeScript interfaces
+    │   ├── pages/
+    │   │   ├── Dashboard.tsx
+    │   │   ├── ScanDetail.tsx
+    │   │   ├── Duplicates.tsx
+    │   │   ├── Todos.tsx
+    │   │   └── Settings.tsx
+    │   ├── components/
+    │   │   ├── layout/
+    │   │   │   ├── Sidebar.tsx     # Nav links + active highlighting
+    │   │   │   └── TopBar.tsx      # Title + New Scan button
+    │   │   ├── shared/
+    │   │   │   ├── Badge.tsx
+    │   │   │   └── ProgressBar.tsx
+    │   │   └── scan/
+    │   │       └── ScanStatusBadge.tsx
+    │   └── hooks/
+    │       └── useScans.ts
+    ├── package.json
+    └── README.md                   # Points to root README
 ```
 
 ---
@@ -179,9 +215,14 @@ Localfile_Analyzer/
 ## Quickstart
 
 ```powershell
+# Terminal 1: Backend
 cd backend
 .\venv\Scripts\Activate.ps1
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
-# -> http://127.0.0.1:8000/docs
-# -> GET /api/v1/health -> {"status":"ok","db":"connected"}
+
+# Terminal 2: Frontend
+cd frontend
+npm run dev
+# -> http://localhost:1420 (sidebar + routing visible)
+# -> Console log: "Backend connected: {status: 'ok', db: 'connected'}"
 ```

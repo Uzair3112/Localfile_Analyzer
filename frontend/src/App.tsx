@@ -1,50 +1,45 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
+import { useEffect } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Sidebar from "./components/layout/Sidebar";
+import TopBar from "./components/layout/TopBar";
+import Dashboard from "./pages/Dashboard";
+import ScanDetail from "./pages/ScanDetail";
+import Duplicates from "./pages/Duplicates";
+import Todos from "./pages/Todos";
+import Settings from "./pages/Settings";
+import { api } from "./api/client";
 import "./App.css";
 
-function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+const pageTitles: Record<string, string> = {
+  "/": "Dashboard",
+  "/scans": "Scans",
+  "/duplicates": "Duplicates",
+  "/todos": "TODO / FIXME",
+  "/settings": "Settings",
+};
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
-  }
+function App() {
+  useEffect(() => {
+    api.health()
+      .then((data) => console.log("Backend connected:", data))
+      .catch((err) => console.warn("Backend unreachable:", err.message));
+  }, []);
 
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
-
-      <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <BrowserRouter>
+      <div className="app-layout">
+        <Sidebar />
+        <div className="main-area">
+          <Routes>
+            <Route path="/" element={<><TopBar title={pageTitles["/"]} /><main className="content"><Dashboard /></main></>} />
+            <Route path="/scans" element={<><TopBar title={pageTitles["/scans"]} /><main className="content"><ScanDetail /></main></>} />
+            <Route path="/duplicates" element={<><TopBar title={pageTitles["/duplicates"]} /><main className="content"><Duplicates /></main></>} />
+            <Route path="/todos" element={<><TopBar title={pageTitles["/todos"]} /><main className="content"><Todos /></main></>} />
+            <Route path="/settings" element={<><TopBar title={pageTitles["/settings"]} /><main className="content"><Settings /></main></>} />
+          </Routes>
+        </div>
       </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-    </main>
+    </BrowserRouter>
   );
 }
 

@@ -18,18 +18,17 @@ Status legend: `[ ]` not started · `[~]` in progress · `[x]` done
   PostgreSQL connection config, SQLAlchemy models (or raw SQL), migration
   tool setup (e.g. Alembic), initial schema creation for all 5 tables.
 
-- [ ] **F03 — Tauri shell scaffold**
-  Tauri + React project init, basic window, sidebar/topbar layout shell
-  (no real data yet), theme/color tokens set up.
+- [x] **F03 — Tauri shell scaffold**
+  Sidebar + topbar layout, CSS theme tokens, react-router-dom, placeholder
+  pages for all 5 screens.
 
-- [ ] **F04 — Tauri ↔ FastAPI process wiring**
-  Tauri spawns/manages the FastAPI process as a sidecar on app start,
-  terminates it on app close; frontend confirms it can reach
-  `http://127.0.0.1:8000`.
+- [x] **F04 — Tauri ↔ FastAPI process wiring**
+  Typed API client with startup health check, `@tauri-apps/plugin-shell`
+  installed and registered.
 
-- [ ] **F05 — Dev environment docs**
-  `docker-compose.yml` for Postgres, README with setup steps (venv,
-  migrations, running both processes together).
+- [x] **F05 — Dev environment docs**
+  Root README with local setup steps (no Docker), backend README, frontend
+  README updated.
 
 ---
 

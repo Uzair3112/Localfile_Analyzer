@@ -1,0 +1,13 @@
+:root {
+  --color-bg: #F5F6F8;
+  --color-card: #FFFFFF;
+  --color-primary: #1F8A5A;
+  --color-primary-light: #E6F4EC;
+  --color-danger: #E5484D;
+  --color-danger-light: #FBEAEA;
+  --color-text-primary: #1A1A1A;
+  --color-text-muted: #6B7280;
+  --radius-card: 16px;
+  --sidebar-width: 230px;
+  --topbar-height: 64px;
+}
