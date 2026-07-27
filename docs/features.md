@@ -34,27 +34,27 @@ Status legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 ## B. Folder Selection & Scan Lifecycle
 
-- [ ] **F06 — Native folder picker**
+- [x] **F06 — Native folder picker**
   Tauri OS folder-selection dialog wired to a "New Scan" button; selected
   path passed to the frontend.
 
-- [ ] **F07 — Start scan API**
+- [x] **F07 — Start scan API**
   `POST /scans` — validates folder path exists/is a directory, creates a
   `scans` row (`status=pending`), returns `scan_id` immediately.
 
-- [ ] **F08 — Background scan execution**
-  FastAPI `BackgroundTask` picks up the pending scan, sets
-  `status=running`, and hands off to the scanner module.
+- [x] **F08 — Background scan execution**
+  FastAPI background task (via `asyncio.create_task`) picks up the pending
+  scan, sets `status=running`, and runs the scanner in a thread executor.
 
-- [ ] **F09 — Scan status polling**
+- [x] **F09 — Scan status polling**
   `GET /scans/{id}` returns current status/progress; frontend polling
   hook (`useScanPolling`) updates the UI until `completed`/`failed`.
 
-- [ ] **F10 — Scan completion & totals**
+- [x] **F10 — Scan completion & totals**
   On finish, scanner writes `total_files`, `total_size`, `total_lines`,
   `completed_at` back to the `scans` row.
 
-- [ ] **F11 — Scan failure handling**
+- [x] **F11 — Scan failure handling**
   Per-file error isolation (skip unreadable/locked files, log and
   continue); scan-level failure sets `status=failed` with
   `error_message`.

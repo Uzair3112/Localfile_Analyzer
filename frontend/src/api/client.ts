@@ -1,4 +1,4 @@
-import type { HealthResponse } from "./types";
+import type { HealthResponse, ScanResponse, ScanListResponse } from "./types";
 
 const API_BASE = "http://127.0.0.1:8000/api/v1";
 
@@ -16,4 +16,16 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
 export const api = {
   health: () => request<HealthResponse>("/health"),
+
+  startScan: (folderPath: string) =>
+    request<ScanResponse>("/scans", {
+      method: "POST",
+      body: JSON.stringify({ folder_path: folderPath }),
+    }),
+
+  getScan: (scanId: number) =>
+    request<ScanResponse>(`/scans/${scanId}`),
+
+  listScans: (page = 1, pageSize = 20) =>
+    request<ScanListResponse>(`/scans?page=${page}&page_size=${pageSize}`),
 };

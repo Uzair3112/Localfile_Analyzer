@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Sidebar from "./components/layout/Sidebar";
 import TopBar from "./components/layout/TopBar";
 import Dashboard from "./pages/Dashboard";
@@ -10,13 +10,40 @@ import Settings from "./pages/Settings";
 import { api } from "./api/client";
 import "./App.css";
 
-const pageTitles: Record<string, string> = {
-  "/": "Dashboard",
-  "/scans": "Scans",
-  "/duplicates": "Duplicates",
-  "/todos": "TODO / FIXME",
-  "/settings": "Settings",
-};
+function AppLayout() {
+  const location = useLocation();
+
+  const getTitle = () => {
+    if (location.pathname.startsWith("/scans/")) return "Scan Detail";
+    switch (location.pathname) {
+      case "/": return "Dashboard";
+      case "/scans": return "Scans";
+      case "/duplicates": return "Duplicates";
+      case "/todos": return "TODO / FIXME";
+      case "/settings": return "Settings";
+      default: return "File Analyzer";
+    }
+  };
+
+  return (
+    <div className="app-layout">
+      <Sidebar />
+      <div className="main-area">
+        <TopBar title={getTitle()} />
+        <main className="content">
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/scans" element={<ScanDetail />} />
+            <Route path="/scans/:scanId" element={<ScanDetail />} />
+            <Route path="/duplicates" element={<Duplicates />} />
+            <Route path="/todos" element={<Todos />} />
+            <Route path="/settings" element={<Settings />} />
+          </Routes>
+        </main>
+      </div>
+    </div>
+  );
+}
 
 function App() {
   useEffect(() => {
@@ -27,18 +54,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="app-layout">
-        <Sidebar />
-        <div className="main-area">
-          <Routes>
-            <Route path="/" element={<><TopBar title={pageTitles["/"]} /><main className="content"><Dashboard /></main></>} />
-            <Route path="/scans" element={<><TopBar title={pageTitles["/scans"]} /><main className="content"><ScanDetail /></main></>} />
-            <Route path="/duplicates" element={<><TopBar title={pageTitles["/duplicates"]} /><main className="content"><Duplicates /></main></>} />
-            <Route path="/todos" element={<><TopBar title={pageTitles["/todos"]} /><main className="content"><Todos /></main></>} />
-            <Route path="/settings" element={<><TopBar title={pageTitles["/settings"]} /><main className="content"><Settings /></main></>} />
-          </Routes>
-        </div>
-      </div>
+      <AppLayout />
     </BrowserRouter>
   );
 }

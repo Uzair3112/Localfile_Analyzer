@@ -3,15 +3,25 @@ export interface HealthResponse {
   db: string;
 }
 
-export interface Scan {
+export type ScanStatus = "pending" | "running" | "completed" | "failed";
+
+export interface ScanResponse {
   scan_id: number;
-  status: "pending" | "running" | "completed" | "failed";
+  status: ScanStatus;
   folder_path: string;
   started_at: string | null;
   completed_at: string | null;
   total_files: number;
   total_size: number;
   total_lines: number;
+  error_message: string | null;
+}
+
+export interface ScanListResponse {
+  scans: ScanResponse[];
+  total: number;
+  page: number;
+  page_size: number;
 }
 
 export interface ScannedFile {

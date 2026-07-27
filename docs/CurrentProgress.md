@@ -42,12 +42,12 @@
 
 ## B. Folder Selection & Scan Lifecycle
 
-- `[ ]` **F06** — Native folder picker
-- `[ ]` **F07** — Start scan API
-- `[ ]` **F08** — Background scan execution
-- `[ ]` **F09** — Scan status polling
-- `[ ]` **F10** — Scan completion & totals
-- `[ ]` **F11** — Scan failure handling
+- `[x]` **F06** — Native folder picker
+- `[x]` **F07** — Start scan API
+- `[x]` **F08** — Background scan execution
+- `[x]` **F09** — Scan status polling
+- `[x]` **F10** — Scan completion & totals
+- `[x]` **F11** — Scan failure handling
 - `[ ]` **F12** — Delete scan
 
 ---
