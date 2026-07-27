@@ -1,0 +1,38 @@
+# ---- Python backend ----
+backend/venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+alembic/versions/*.pyc
+
+# ---- Node / frontend ----
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/*.local
+*.log
+
+# ---- Tauri / Rust ----
+frontend/src-tauri/target/
+frontend/src-tauri/gen/schemas
+
+# ---- OS files ----
+.DS_Store
+Thumbs.db
+
+# ---- IDE ----
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ---- Misc ----
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
