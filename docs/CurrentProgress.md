@@ -68,10 +68,10 @@
 
 ## D. Hashing & Duplicate Detection
 
-- `[ ]` **F22** — SHA-256 hashing (streamed)
-- `[ ]` **F23** — Size-based duplicate candidate grouping
-- `[ ]` **F24** — Duplicate group persistence
-- `[ ]` **F25** — Duplicates API & view
+- `[x]` **F22** — SHA-256 hashing (streamed)
+- `[x]` **F23** — Size-based duplicate candidate grouping
+- `[x]` **F24** — Duplicate group persistence
+- `[x]` **F25** — Duplicates API & view
 
 ---
 

@@ -16,9 +16,13 @@ from app.schemas.scan import (
     ScanListResponse,
     ScannedFileResponse,
     ScannedFileListResponse,
+    DuplicateFileInfo,
+    DuplicateGroup,
+    DuplicateListResponse,
 )
 from app.scanner.runner import run_scan
 from app.models.scanned_file import ScannedFile
+from app.models.duplicate import Duplicate
 
 router = APIRouter(prefix="/scans", tags=["scans"])
 
@@ -188,4 +192,72 @@ async def get_scan_files(
         total=total,
         page=page,
         page_size=page_size,
+    )
+
+
+@router.get("/{scan_id}/duplicates")
+async def get_scan_duplicates(
+    scan_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(Scan).where(Scan.id == scan_id))
+    scan = result.scalar_one_or_none()
+    if not scan:
+        return _error_response("SCAN_NOT_FOUND", f"No scan exists with id {scan_id}", status=404)
+
+    if scan.status != ScanStatus.completed:
+        return _error_response("SCAN_NOT_COMPLETED", "Duplicates are available only after scan completes")
+
+    dup_file_ids_subq = (
+        select(Duplicate.file1_id)
+        .where(Duplicate.scan_id == scan_id)
+        .union(
+            select(Duplicate.file2_id).where(Duplicate.scan_id == scan_id)
+        )
+        .subquery()
+    )
+
+    result = await db.execute(
+        select(ScannedFile)
+        .where(ScannedFile.id.in_(select(dup_file_ids_subq.c)))
+        .order_by(ScannedFile.sha256, ScannedFile.full_path)
+    )
+    dup_files = result.scalars().all()
+
+    groups_map: dict[str, list[ScannedFile]] = {}
+    for sf in dup_files:
+        if sf.sha256 not in groups_map:
+            groups_map[sf.sha256] = []
+        groups_map[sf.sha256].append(sf)
+
+    groups_list = []
+    total_wasted = 0
+    for file_hash, files in groups_map.items():
+        if len(files) < 2:
+            continue
+        file_infos = [
+            DuplicateFileInfo(
+                id=f.id,
+                filename=f.filename,
+                full_path=f.full_path,
+                extension=f.extension,
+                size=f.size,
+            )
+            for f in files
+        ]
+        wasted = (len(files) - 1) * files[0].size
+        total_wasted += wasted
+        groups_list.append(DuplicateGroup(
+            hash=file_hash,
+            files=file_infos,
+            total_savings=wasted,
+        ))
+
+    total_dup_files = sum(len(g.files) for g in groups_list)
+
+    return DuplicateListResponse(
+        groups=groups_list,
+        total_groups=len(groups_list),
+        total_duplicates=total_dup_files,
+        total_wasted_bytes=total_wasted,
     )

@@ -67,6 +67,27 @@ export interface Duplicate {
   file2_id: number;
 }
 
+export interface DuplicateFileInfo {
+  id: number;
+  filename: string;
+  full_path: string;
+  extension: string | null;
+  size: number;
+}
+
+export interface DuplicateGroup {
+  hash: string;
+  files: DuplicateFileInfo[];
+  total_savings: number;
+}
+
+export interface DuplicateListResponse {
+  groups: DuplicateGroup[];
+  total_groups: number;
+  total_duplicates: number;
+  total_wasted_bytes: number;
+}
+
 export interface ScanSettings {
   ignore_hidden: boolean;
   ignore_node_modules: boolean;

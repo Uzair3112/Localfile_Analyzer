@@ -3,6 +3,7 @@ import type {
   ScanResponse,
   ScanListResponse,
   ScannedFileListResponse,
+  DuplicateListResponse,
   SettingsResponse,
 } from "./types";
 
@@ -71,6 +72,9 @@ export const api = {
     const qs = query.toString();
     return request<ScannedFileListResponse>(`/scans/${scanId}/files${qs ? `?${qs}` : ""}`);
   },
+
+  getScanDuplicates: (scanId: number) =>
+    request<DuplicateListResponse>(`/scans/${scanId}/duplicates`),
 
   getSettings: () => request<SettingsResponse>("/settings"),
 

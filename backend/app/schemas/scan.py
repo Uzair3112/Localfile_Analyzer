@@ -52,6 +52,29 @@ class ScannedFileListResponse(BaseModel):
     page_size: int
 
 
+class DuplicateFileInfo(BaseModel):
+    id: int
+    filename: str
+    full_path: str
+    extension: Optional[str] = None
+    size: int
+
+    model_config = {"from_attributes": True}
+
+
+class DuplicateGroup(BaseModel):
+    hash: str
+    files: list[DuplicateFileInfo]
+    total_savings: int
+
+
+class DuplicateListResponse(BaseModel):
+    groups: list[DuplicateGroup]
+    total_groups: int
+    total_duplicates: int
+    total_wasted_bytes: int
+
+
 class ErrorDetail(BaseModel):
     code: str
     message: str

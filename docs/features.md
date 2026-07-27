@@ -103,18 +103,18 @@ Status legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 ## D. Hashing & Duplicate Detection
 
-- [ ] **F22 — SHA-256 hashing (streamed)**
+- [x] **F22 — SHA-256 hashing (streamed)**
   Compute file hashes via chunked/streamed reads (no full-file memory
   load).
 
-- [ ] **F23 — Size-based duplicate candidate grouping**
+- [x] **F23 — Size-based duplicate candidate grouping**
   Pre-filter: only hash files that share an exact size with at least one
   other file, to avoid hashing every file.
 
-- [ ] **F24 — Duplicate group persistence**
+- [x] **F24 — Duplicate group persistence**
   Insert `duplicates` rows for confirmed hash matches after full scan.
 
-- [ ] **F25 — Duplicates API & view**
+- [x] **F25 — Duplicates API & view**
   `GET /scans/{id}/duplicates` + frontend Duplicates page listing grouped
   duplicate files with paths and sizes.
 
