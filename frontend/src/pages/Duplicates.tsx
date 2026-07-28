@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useSearchParams, Link } from "react-router-dom";
 import { api } from "../api/client";
 import type { DuplicateListResponse } from "../api/types";
 
@@ -14,12 +15,18 @@ function formatNumber(n: number): string {
 }
 
 export default function Duplicates() {
-  const [scanId, setScanId] = useState<number | null>(null);
+  const [searchParams] = useSearchParams();
+  const scanIdParam = searchParams.get("scanId");
+  const [scanId, setScanId] = useState<number | null>(scanIdParam ? parseInt(scanIdParam, 10) : null);
   const [data, setData] = useState<DuplicateListResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (scanIdParam) {
+      setScanId(parseInt(scanIdParam, 10));
+      return;
+    }
     api.listScans(1, 1)
       .then((res) => {
         const completed = res.scans.find((s) => s.status === "completed");
@@ -28,7 +35,7 @@ export default function Duplicates() {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [scanIdParam]);
 
   const fetchDuplicates = useCallback(async (id: number) => {
     setLoading(true);
@@ -51,7 +58,13 @@ export default function Duplicates() {
 
   return (
     <div className="page">
-      <h1>Duplicates</h1>
+      <h1>Duplicates {scanId ? <span style={{ fontSize: 14, fontWeight: 400, color: "var(--color-text-muted)" }}>(Scan #{scanId})</span> : null}</h1>
+
+      {!scanId && !loading && (
+        <p style={{ marginTop: 16, color: "var(--color-text-muted)" }}>
+          Select a scan from <Link to="/scans" style={{ color: "var(--color-primary)" }}>Scans</Link> to view its duplicates.
+        </p>
+      )}
 
       {loading && (
         <p style={{ marginTop: 16, color: "var(--color-text-muted)" }}>
@@ -67,7 +80,7 @@ export default function Duplicates() {
 
       {data && data.total_groups === 0 && !loading && (
         <p style={{ marginTop: 16, color: "var(--color-text-muted)" }}>
-          No duplicate files found in the latest scan.
+          No duplicate files found in this scan.
         </p>
       )}
 
@@ -88,7 +101,7 @@ export default function Duplicates() {
             </div>
           </div>
 
-          {data.groups.map((group) => (
+          {data.groups.map((group, idx) => (
             <div key={group.hash} style={{ marginTop: 24 }}>
               <div style={{
                 display: "flex",
@@ -96,8 +109,8 @@ export default function Duplicates() {
                 alignItems: "center",
                 marginBottom: 12,
               }}>
-                <h3 style={{ fontSize: 16, fontWeight: 600, fontFamily: "monospace" }}>
-                  {group.hash.substring(0, 16)}...
+                <h3 style={{ fontSize: 16, fontWeight: 600 }}>
+                  Group {idx + 1}
                 </h3>
                 <span style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
                   {group.files.length} copies · {formatBytes(group.files[0].size)} each ·{" "}
@@ -141,9 +154,9 @@ export default function Duplicates() {
         </>
       )}
 
-      {!loading && !error && data === null && (
+      {!loading && !error && data === null && scanId && (
         <p style={{ marginTop: 16, color: "var(--color-text-muted)" }}>
-          No completed scans found. Run a scan first to see duplicates.
+          No data available for this scan.
         </p>
       )}
     </div>

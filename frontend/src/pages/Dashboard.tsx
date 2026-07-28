@@ -23,20 +23,21 @@ function statusClass(status: string): string {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [recentScans, setRecentScans] = useState<ScanResponse[]>([]);
+  const [allScans, setAllScans] = useState<ScanResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.listScans(1, 5)
+    api.listScans(1, 1000)
       .then((data) => {
-        setRecentScans(data.scans);
+        setAllScans(data.scans);
         setLoading(false);
       })
       .catch(() => setLoading(false));
   }, []);
 
-  const totalFiles = recentScans.reduce((s, r) => s + r.total_files, 0);
-  const totalSize = recentScans.reduce((s, r) => s + r.total_size, 0);
+  const recentScans = allScans.slice(0, 5);
+  const totalFiles = allScans.reduce((s, r) => s + r.total_files, 0);
+  const totalSize = allScans.reduce((s, r) => s + r.total_size, 0);
 
   return (
     <div className="page">
@@ -45,7 +46,7 @@ export default function Dashboard() {
       <div className="scan-stats-grid" style={{ marginTop: 24 }}>
         <div className="scan-stat-card">
           <div className="scan-stat-label">Total Scans</div>
-          <div className="scan-stat-value">{recentScans.length}</div>
+          <div className="scan-stat-value">{allScans.length}</div>
         </div>
         <div className="scan-stat-card">
           <div className="scan-stat-label">Files Found</div>

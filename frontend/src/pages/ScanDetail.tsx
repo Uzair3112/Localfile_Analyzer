@@ -258,10 +258,9 @@ export default function ScanDetail() {
         </div>
       )}
 
-      {/* File table — only after scan completes */}
-      {scan.status === "completed" && (
+      {scan.status === "completed" && id && (
         <div style={{ marginTop: 32 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 8 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
             <h2 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>
               Files
               <span style={{ fontSize: 14, fontWeight: 400, color: "var(--color-text-muted)", marginLeft: 8 }}>

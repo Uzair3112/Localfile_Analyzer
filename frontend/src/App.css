@@ -583,3 +583,34 @@ body {
 .settings-toggle input:checked + .settings-toggle-slider::before {
   transform: translateX(20px);
 }
+
+/* Scan tabs */
+.scan-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.scan-tab {
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.scan-tab:hover {
+  color: var(--color-primary);
+}
+
+.scan-tab.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  font-weight: 600;
+}
