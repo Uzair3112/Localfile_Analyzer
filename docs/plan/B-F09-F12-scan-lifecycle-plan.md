@@ -85,7 +85,7 @@ async def delete_scan(
 Logic:
 1. Query `Scan` by id
 2. If not found: return `_error_response("SCAN_NOT_FOUND", ..., 404)`
-3. Delete the scan row — cascade deletes handle `scanned_files`, `todos`, `duplicates` automatically (FKs defined with `ON DELETE CASCADE` in the migration)
+3. Delete the scan row — cascade deletes handle `scanned_files`, `duplicates` automatically (FKs defined with `ON DELETE CASCADE` in the migration)
 4. Commit
 5. Return `{"status": "deleted", "scan_id": scan_id}`
 
@@ -120,7 +120,7 @@ curl.exe -X DELETE http://127.0.0.1:8000/api/v1/scans/1
 curl.exe http://127.0.0.1:8000/api/v1/scans/1
 # Expected: 404 {"error": {"code": "SCAN_NOT_FOUND", "message": "..."}}
 
-# Verify cascading delete — no orphan rows in scanned_files, todos, duplicates
+# Verify cascading delete — no orphan rows in scanned_files, duplicates
 ```
 
 ---

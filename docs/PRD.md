@@ -13,7 +13,7 @@
 Local File Analyzer is a desktop application that scans a user-selected
 folder on their machine and generates statistics, reports, and visual
 dashboards about the files inside it — file counts, line counts, duplicate
-files, large files, TODO/FIXME comments, and extension breakdowns.
+files, large files, and extension breakdowns.
 
 The project exists for two reasons:
 
@@ -58,7 +58,7 @@ The project exists for two reasons:
 - **FastAPI** provides a clean, typed API layer between the UI and the
   scanning/DB logic — same shape RAMPART will need.
 - **PostgreSQL** supports structured relational queries (duplicates,
-  history, joins across files/todos) better than flat files or SQLite at
+  history, joins across files/duplicates) better than flat files or SQLite at
   RAMPART's eventual scale.
 
 ---
@@ -79,8 +79,8 @@ The project exists for two reasons:
                                                  │
                                         ┌────────▼────────┐
                                         │   PostgreSQL     │
-                                        │  (scans, files,  │
-                                        │  todos, dupes)   │
+                                         │  (scans, files,  │
+                                         │  duplicates)     │
                                         └──────────────────┘
 ```
 
@@ -90,7 +90,7 @@ The project exists for two reasons:
 2. Tauri sends the folder path to FastAPI (`POST /scans`).
 3. FastAPI creates a `scans` row and kicks off the scanner (async/background task).
 4. The scanner walks the folder tree recursively, collecting metadata per file.
-5. Metadata, TODO/FIXME hits, and duplicate hashes are written to PostgreSQL.
+5. Metadata and duplicate hashes are written to PostgreSQL.
 6. The frontend polls (or receives a completion event) and renders the
    dashboard, charts, and history view.
 
@@ -109,7 +109,6 @@ The project exists for two reasons:
 - Line counts for text/code files.
 - Duplicate file detection via SHA-256 hashing.
 - Large-file detection (configurable threshold).
-- TODO / FIXME comment extraction with file + line number.
 - File extension breakdown (count, size, % of total).
 
 ### 5.3 Reporting & History
@@ -153,15 +152,6 @@ The project exists for two reasons:
 | sha256 | text |
 | created_at | timestamp |
 | modified_at | timestamp |
-
-**Table: `todos`**
-| Column | Type |
-|---|---|
-| id | PK |
-| file_id | FK → scanned_files |
-| line_number | int |
-| type | enum (TODO / FIXME) |
-| message | text |
 
 **Table: `duplicates`**
 | Column | Type |
@@ -234,8 +224,7 @@ data changes.
    sortable by size/lines/extension.
 3. **Duplicates View** — grouped by hash, with file pairs and "reveal in
    folder" action.
-4. **TODO/FIXME View** — list grouped by file, with jump-to-line context.
-5. **Settings** — ignore rules, max file size, theme.
+4. **Settings** — ignore rules, max file size, theme.
 
 ---
 
@@ -256,7 +245,7 @@ data changes.
 | 1 | Tauri shell + folder picker + FastAPI hello-world round trip |
 | 2 | Recursive scanner + DB schema + basic scan-to-DB pipeline |
 | 3 | Dashboard UI with real stats (files, size, lines) |
-| 4 | Duplicate detection + TODO/FIXME extraction |
+| 4 | Duplicate detection |
 | 5 | Scan history, search, charts polish |
 | 6 | Settings panel + ignore rules |
 | 7 | Polish pass matching reference UI style, packaging/build |

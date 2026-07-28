@@ -4,7 +4,6 @@ const navItems = [
   { to: "/", label: "Dashboard" },
   { to: "/scans", label: "Scans" },
   { to: "/duplicates", label: "Duplicates" },
-  { to: "/todos", label: "TODO / FIXME" },
   { to: "/settings", label: "Settings" },
 ];
 

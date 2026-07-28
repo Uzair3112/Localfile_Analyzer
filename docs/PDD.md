@@ -63,7 +63,6 @@ Base URL: `http://127.0.0.1:8000/api/v1`
 | `DELETE` | `/scans/{scan_id}` | Delete a scan and its data |
 | `GET` | `/scans/{scan_id}/files` | List scanned files (filter/search/sort/paginate) |
 | `GET` | `/scans/{scan_id}/duplicates` | List duplicate groups |
-| `GET` | `/scans/{scan_id}/todos` | List TODO/FIXME entries |
 | `GET` | `/scans/{scan_id}/extensions` | Extension breakdown stats |
 | `GET` | `/settings` | Get current global scan settings |
 | `PUT` | `/settings` | Update global scan settings |
@@ -178,7 +177,6 @@ Background task: status → running
         ├─ apply ignore rules (hidden, node_modules, max_size, custom globs)
         ├─ for each file:
         │     ├─ compute size, extension, mtime/ctime
-        │     ├─ if text-like: count lines, scan for TODO/FIXME
         │     └─ compute SHA-256 hash
         ├─ batch-insert scanned_files rows (chunks of ~500)
         ├─ after all files inserted: run duplicate-detection query
@@ -216,7 +214,6 @@ out post-hoc. This matters a lot for performance on JS projects.
 
 ```sql
 CREATE TYPE scan_status AS ENUM ('pending', 'running', 'completed', 'failed');
-CREATE TYPE todo_type AS ENUM ('TODO', 'FIXME');
 
 CREATE TABLE scans (
     id              SERIAL PRIMARY KEY,
@@ -246,15 +243,6 @@ CREATE TABLE scanned_files (
 CREATE INDEX idx_scanned_files_scan_id ON scanned_files(scan_id);
 CREATE INDEX idx_scanned_files_hash ON scanned_files(sha256);
 CREATE INDEX idx_scanned_files_extension ON scanned_files(extension);
-
-CREATE TABLE todos (
-    id              SERIAL PRIMARY KEY,
-    file_id         INTEGER NOT NULL REFERENCES scanned_files(id) ON DELETE CASCADE,
-    line_number     INTEGER NOT NULL,
-    type            todo_type NOT NULL,
-    message         TEXT
-);
-CREATE INDEX idx_todos_file_id ON todos(file_id);
 
 CREATE TABLE duplicates (
     id              SERIAL PRIMARY KEY,
@@ -299,7 +287,6 @@ src/
 │   ├── Dashboard.tsx
 │   ├── ScanDetail.tsx
 │   ├── Duplicates.tsx
-│   ├── Todos.tsx
 │   └── Settings.tsx
 ├── components/
 │   ├── layout/
@@ -356,12 +343,11 @@ scanner/
 ├── walker.py       # recursive traversal + ignore-rule application
 ├── hasher.py        # streamed SHA-256 computation
 ├── line_counter.py  # text-file detection + line counting
-├── todo_finder.py   # regex-based TODO/FIXME extraction
 └── runner.py        # orchestrates the above, writes to DB in batches
 ```
 
 - **Text-file detection:** attempt UTF-8 decode on first 8KB; binary files
-  are skipped for line-counting/TODO-scanning but still counted for
+  are skipped for line-counting but still counted for
   size/duplicate stats.
 - **Batch inserts:** accumulate rows in memory (chunks of ~500) and flush
   with `executemany`/`COPY` rather than one INSERT per file — critical for

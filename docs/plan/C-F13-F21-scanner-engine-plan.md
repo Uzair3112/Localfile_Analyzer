@@ -16,7 +16,7 @@ The existing `runner.py` has a monolithic `_walk_folder()` function that:
 - Calls `_is_text_file()` and `_count_lines()` inline (helper functions in the same file)
 - Updates `scans` table totals only — **never inserts `scanned_files` rows**
 
-The dedicated modules (`walker.py`, `line_counter.py`, `hasher.py`, `todo_finder.py`) are all empty stubs.
+The dedicated modules (`walker.py`, `line_counter.py`, `hasher.py`) are all empty stubs.
 
 **What needs to change:** Refactor the monolithic walk into the modular architecture described in PDD §6, with each module doing one job. The central change is that the walker must now produce `ScannedFile` records (not just counts), and those records must be batch-inserted into PostgreSQL.
 
@@ -355,7 +355,7 @@ for file_path, stat in walk_folder(folder_path, settings):
 ## F19 — Text-File Detection
 
 ### Objective
-Determine whether a file is text or binary by attempting UTF-8 decoding on the first N bytes (8 KB). Binary files are skipped for line counting and TODO scanning but are still counted for size/duplicate stats.
+Determine whether a file is text or binary by attempting UTF-8 decoding on the first N bytes (8 KB). Binary files are skipped for line counting but are still counted for size/duplicate stats.
 
 ### Implementation Steps
 

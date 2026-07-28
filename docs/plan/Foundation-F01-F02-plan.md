@@ -44,7 +44,7 @@ backend/
 │   │   ├── __init__.py
 │   │   ├── scan.py          # Scan ORM model
 │   │   ├── scanned_file.py  # ScannedFile ORM model
-│   │   ├── todo.py          # Todo ORM model
+
 │   │   ├── duplicate.py     # Duplicate ORM model
 │   │   └── scan_settings.py # ScanSettings ORM model
 │   └── scanner/
@@ -53,7 +53,7 @@ backend/
 │       ├── walker.py        # stub
 │       ├── hasher.py        # stub
 │       ├── line_counter.py  # stub
-│       └── todo_finder.py   # stub
+
 ├── alembic/                 # (created by alembic init)
 ├── alembic.ini
 ├── requirements.txt         # (already exists — frozen)
@@ -160,18 +160,15 @@ Relationships: `files = relationship("ScannedFile", back_populates="scan", casca
 | `created_at` | `DateTime(timezone=True), nullable` | |
 | `modified_at` | `DateTime(timezone=True), nullable` | |
 
-Relationships: `scan = relationship("Scan", back_populates="files")`, `todos = relationship("Todo", back_populates="file", cascade="all, delete-orphan")`.
 
-**`app/models/todo.py`** — `Todo` table:
 | Column | Type | Notes |
 |---|---|---|
 | `id` | `Integer, PK` | |
 | `file_id` | `Integer, FK -> scanned_files.id` | indexed |
 | `line_number` | `Integer, not null` | |
-| `type` | `Enum('TODO','FIXME')` | |
-| `message` | `Text, nullable` | |
 
-Relationships: `file = relationship("ScannedFile", back_populates="todos")`.
+
+
 
 **`app/models/duplicate.py`** — `Duplicate` table:
 | Column | Type | Notes |
@@ -280,7 +277,7 @@ Then open `http://127.0.0.1:8000/docs` in a browser — all future endpoint stub
 | 3 | `app/models/__init__.py` | Create — Base, model imports |
 | 4 | `app/models/scan.py` | Create — Scan model |
 | 5 | `app/models/scanned_file.py` | Create — ScannedFile model |
-| 6 | `app/models/todo.py` | Create — Todo model |
+
 | 7 | `app/models/duplicate.py` | Create — Duplicate model |
 | 8 | `app/models/scan_settings.py` | Create — ScanSettings model |
 | 9 | `app/api/__init__.py` | Create (empty) |

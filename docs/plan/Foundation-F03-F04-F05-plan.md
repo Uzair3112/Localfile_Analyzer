@@ -54,7 +54,7 @@ frontend/src/
 │   ├── Dashboard.tsx           # placeholder
 │   ├── ScanDetail.tsx          # placeholder
 │   ├── Duplicates.tsx          # placeholder
-│   ├── Todos.tsx               # placeholder
+
 │   └── Settings.tsx            # placeholder
 ├── components/
 │   ├── layout/
@@ -82,7 +82,7 @@ frontend/src/
   - Dashboard (`/`)
   - Scans (`/scans`)
   - Duplicates (`/duplicates`)
-  - TODO/FIXME (`/todos`)
+
   - Settings (`/settings`)
 - Active item highlighted with `--color-primary-light` background + green left border.
 - Bottom section: "Pro Tips" card placeholder (light card with tip text).
@@ -101,7 +101,7 @@ function Dashboard() {
   return <div className="page"><h1>Dashboard</h1></div>;
 }
 ```
-Same pattern for ScanDetail, Duplicates, Todos, Settings.
+Same pattern for ScanDetail, Duplicates, Settings.
 
 #### 3.6 Set up routing in `App.tsx`
 - Wrap everything in `BrowserRouter`.
@@ -124,7 +124,7 @@ Click each nav link — the corresponding placeholder page shows.
 The active nav item highlights correctly.
 
 #### 3.9 Acceptance Criteria for F03
-- Sidebar renders with all 5 nav links (Dashboard, Scans, Duplicates, Todos, Settings).
+- Sidebar renders with all 4 nav links (Dashboard, Scans, Duplicates, Settings).
 - Clicking a nav link updates the route and highlights the active item.
 - TopBar shows "New Scan" button (non-functional).
 - Theme tokens are globally available via CSS variables.

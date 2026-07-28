@@ -22,8 +22,8 @@
 
 - `[x]` **F02 — Database connection & migrations**
   SQLAlchemy models for all 5 tables, Alembic configured with autogenerate,
-  initial migration created and applied. Tables: `scans`, `scanned_files`,
-  `todos`, `duplicates`, `scan_settings`.
+  initial migration created and applied.   Tables: `scans`, `scanned_files`,
+  `duplicates`, `scan_settings`.
 
 - `[x]` **F03 — Tauri shell scaffold**
   Sidebar with 5 nav links, TopBar with "New Scan" button, CSS theme tokens,
@@ -75,58 +75,50 @@
 
 ---
 
-## E. TODO / FIXME Extraction
+## E. File Browsing & Search
 
-- `[ ]` **F26** — TODO/FIXME regex scanner
-- `[ ]` **F27** — Todos persistence
-- `[ ]` **F28** — Todos API & view
-
----
-
-## F. File Browsing & Search
-
-- `[ ]` **F29** — File list API
-- `[ ]` **F30** — File table UI
-- `[ ]` **F31** — Extension breakdown API
-- `[ ]` **F32** — Extension breakdown UI
+- `[ ]` **F26** — File list API
+- `[ ]` **F27** — File table UI
+- `[ ]` **F28** — Extension breakdown API
+- `[ ]` **F29** — Extension breakdown UI
 
 ---
 
-## G. Dashboard & Reporting
+## F. Dashboard & Reporting
 
-- `[ ]` **F33** — Dashboard layout
-- `[ ]` **F34** — Stat cards
-- `[ ]` **F35** — Overview chart
-- `[ ]` **F36** — Largest files list
-- `[ ]` **F37** — Largest folders list
-- `[ ]` **F38** — Recent scans table
-- `[ ]` **F39** — Scan history / comparison view
-- `[ ]` **F40** — Cleanup goals widget *(stretch)*
-
----
-
-## H. Settings
-
-- `[ ]` **F41** — Settings API
-- `[ ]` **F42** — Settings UI page
-- `[ ]` **F43** — Per-scan settings override
+- `[ ]` **F30** — Dashboard layout
+- `[ ]` **F31** — Stat cards
+- `[ ]` **F32** — Overview chart
+- `[ ]` **F33** — Largest files list
+- `[ ]` **F34** — Largest folders list
+- `[ ]` **F35** — Recent scans table
+- `[ ]` **F36** — Scan history / comparison view
+- `[ ]` **F37** — Cleanup goals widget *(stretch)*
 
 ---
 
-## I. Packaging & Polish
+## G. Settings
 
-- `[ ]` **F44** — Backend sidecar packaging
-- `[ ]` **F45** — Postgres connectivity check & setup screen
-- `[ ]` **F46** — Cross-platform build
-- `[ ]` **F47** — Visual polish pass
+- `[ ]` **F38** — Settings API
+- `[ ]` **F39** — Settings UI page
+- `[ ]` **F40** — Per-scan settings override
 
 ---
 
-## Stretch / Deferred
+## H. Packaging & Polish
 
-- `[ ]` **F48** — Scan cancellation
-- `[ ]` **F49** — Real-time file-system watching
-- `[ ]` **F50** — SSE/WebSocket-based scan updates
+- `[ ]` **F41** — Backend sidecar packaging
+- `[ ]` **F42** — Postgres connectivity check & setup screen
+- `[ ]` **F43** — Cross-platform build
+- `[ ]` **F44** — Visual polish pass
+
+---
+
+## I. Stretch / Deferred
+
+- `[ ]` **F45** — Scan cancellation
+- `[ ]` **F46** — Real-time file-system watching
+- `[ ]` **F47** — SSE/WebSocket-based scan updates
 
 ---
 
@@ -171,9 +163,8 @@ Localfile_Analyzer/
 │   │       ├── runner.py           # orchestrator: walk → metadata → batch DB insert
 │   │       ├── walker.py           # recursive walker with os.scandir + descend-time filtering
 │   │       ├── ignore_rules.py     # should_ignore_path (hidden, node_modules, custom globs)
-│   │       ├── hasher.py           # stub (for F22+)
-│   │       ├── line_counter.py     # is_text_file + count_lines
-│   │       └── todo_finder.py      # stub (for F26+)
+│   │       ├── hasher.py           # streamed SHA-256
+│   │       └── line_counter.py     # is_text_file + count_lines
 │   ├── alembic/
 │   │   ├── env.py                  # configured with app models
 │   │   ├── script.py.mako

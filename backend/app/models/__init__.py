@@ -4,8 +4,7 @@ Base = declarative_base()
 
 from app.models.scan import Scan
 from app.models.scanned_file import ScannedFile
-from app.models.todo import Todo
 from app.models.duplicate import Duplicate
 from app.models.scan_settings import ScanSettings
 
-__all__ = ["Base", "Scan", "ScannedFile", "Todo", "Duplicate", "ScanSettings"]
+__all__ = ["Base", "Scan", "ScannedFile", "Duplicate", "ScanSettings"]

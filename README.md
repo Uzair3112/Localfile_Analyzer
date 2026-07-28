@@ -1,6 +1,6 @@
 # Local File Analyzer
 
-A desktop application that scans a user-selected folder and generates statistics, reports, and visual dashboards about the files inside it — file counts, line counts, duplicate files, large files, TODO/FIXME comments, and extension breakdowns.
+A desktop application that scans a user-selected folder and generates statistics, reports, and visual dashboards about the files inside it — file counts, line counts, duplicate files, large files, and extension breakdowns.
 
 ## Tech Stack
 

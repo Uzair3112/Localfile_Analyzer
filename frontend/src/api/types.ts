@@ -51,14 +51,6 @@ export interface SettingsResponse {
   custom_ignore_globs: string[];
 }
 
-export interface Todo {
-  id: number;
-  file_id: number;
-  line_number: number;
-  type: "TODO" | "FIXME";
-  message: string | null;
-}
-
 export interface Duplicate {
   id: number;
   scan_id: number;

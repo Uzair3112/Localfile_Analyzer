@@ -6,7 +6,6 @@ import Dashboard from "./pages/Dashboard";
 import ScansList from "./pages/ScansList";
 import ScanDetail from "./pages/ScanDetail";
 import Duplicates from "./pages/Duplicates";
-import Todos from "./pages/Todos";
 import Settings from "./pages/Settings";
 import { api } from "./api/client";
 import "./App.css";
@@ -20,7 +19,6 @@ function AppLayout() {
       case "/": return "Dashboard";
       case "/scans": return "Scans";
       case "/duplicates": return "Duplicates";
-      case "/todos": return "TODO / FIXME";
       case "/settings": return "Settings";
       default: return "File Analyzer";
     }
@@ -37,7 +35,6 @@ function AppLayout() {
             <Route path="/scans" element={<ScansList />} />
             <Route path="/scans/:scanId" element={<ScanDetail />} />
             <Route path="/duplicates" element={<Duplicates />} />
-            <Route path="/todos" element={<Todos />} />
             <Route path="/settings" element={<Settings />} />
           </Routes>
         </main>

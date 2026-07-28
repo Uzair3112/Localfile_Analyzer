@@ -61,7 +61,7 @@ Status legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 - [x] **F12 — Delete scan**
   `DELETE /scans/{id}` removes the scan and cascades to all related rows
-  (files, todos, duplicates).
+  (files, duplicates).
 
 ---
 
@@ -90,7 +90,7 @@ Status legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 - [x] **F19 — Text-file detection**
   Detect text vs. binary files (UTF-8 decode attempt on first N bytes) to
-  decide whether line-counting/TODO-scanning applies.
+  decide whether line-counting applies.
 
 - [x] **F20 — Line counting**
   Count lines for detected text/code files; store as `line_count`.
@@ -120,121 +120,106 @@ Status legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 ---
 
-## E. TODO / FIXME Extraction
+## E. File Browsing & Search
 
-- [ ] **F26 — TODO/FIXME regex scanner**
-  Detect `TODO`/`FIXME` comments per line in text/code files during the
-  scan pass.
-
-- [ ] **F27 — Todos persistence**
-  Insert `todos` rows (file, line number, type, message) per match.
-
-- [ ] **F28 — Todos API & view**
-  `GET /scans/{id}/todos` + frontend Todos page grouped by file with
-  jump-to-line context.
-
----
-
-## F. File Browsing & Search
-
-- [ ] **F29 — File list API**
+- [ ] **F26 — File list API**
   `GET /scans/{id}/files` with filtering (extension, search term),
   sorting (size, lines, name), and pagination.
 
-- [ ] **F30 — File table UI**
+- [ ] **F27 — File table UI**
   Sortable/searchable/paginated table component (`FileTable`) on the Scan
   Detail page.
 
-- [ ] **F31 — Extension breakdown API**
+- [ ] **F28 — Extension breakdown API**
   `GET /scans/{id}/extensions` — count, total size, % of total per
   extension.
 
-- [ ] **F32 — Extension breakdown UI**
+- [ ] **F29 — Extension breakdown UI**
   "Top Extensions" card on the dashboard (styled per the wallet-card
   reference pattern).
 
 ---
 
-## G. Dashboard & Reporting
+## F. Dashboard & Reporting
 
-- [ ] **F33 — Dashboard layout**
+- [ ] **F30 — Dashboard layout**
   Sidebar + topbar + welcome header + "New Scan" primary action, per the
   reference UI style.
 
-- [ ] **F34 — Stat cards**
+- [ ] **F31 — Stat cards**
   Reusable `StatCard` component: Total Files, Total Size, Duplicate
   Files, with icon badges and delta-vs-previous-scan indicators.
 
-- [ ] **F35 — Overview chart**
+- [ ] **F32 — Overview chart**
   Bar chart (Recharts) of files/lines scanned over time or per scan run,
   with hover tooltips.
 
-- [ ] **F36 — Largest files list**
+- [ ] **F33 — Largest files list**
   Query + UI card showing the top N largest files in a scan.
 
-- [ ] **F37 — Largest folders list**
+- [ ] **F34 — Largest folders list**
   Aggregate file sizes by parent directory; show top N largest folders.
 
-- [ ] **F38 — Recent scans table**
+- [ ] **F35 — Recent scans table**
   Dashboard table listing recent scans with folder path, date, file
   count, and status pill (Success/Running/Failed).
 
-- [ ] **F39 — Scan history / comparison view**
+- [ ] **F36 — Scan history / comparison view**
   Dedicated view listing all past scans, allowing browsing/comparison
   across runs (including for the same folder over time).
 
-- [ ] **F40 — Cleanup goals widget** *(stretch)*
+- [ ] **F37 — Cleanup goals widget** *(stretch)*
   UI card summarizing actionable cleanup items (e.g. "12/40 duplicates
   resolved") — presentation only in v1, no auto-resolution.
 
 ---
 
-## H. Settings
+## G. Settings
 
-- [ ] **F41 — Settings API**
+- [ ] **F38 — Settings API**
   `GET /settings` and `PUT /settings` for global scan settings
   (`ignore_hidden`, `ignore_node_modules`, `max_file_size`,
   `custom_ignore_globs`).
 
-- [ ] **F42 — Settings UI page**
+- [ ] **F39 — Settings UI page**
   Form for editing global defaults.
 
-- [ ] **F43 — Per-scan settings override**
+- [ ] **F40 — Per-scan settings override**
   "New Scan" dialog allows overriding global defaults for a single scan;
   override is snapshotted into `scans.settings_snapshot` (JSONB).
 
 ---
 
-## I. Packaging & Polish
+## H. Packaging & Polish
 
-- [ ] **F44 — Backend sidecar packaging**
+- [ ] **F41 — Backend sidecar packaging**
   Build the FastAPI backend into a standalone binary (PyInstaller or
   similar) from the venv, for bundling with the Tauri app.
 
-- [ ] **F45 — Postgres connectivity check & setup screen**
+- [ ] **F42 — Postgres connectivity check & setup screen**
   On launch, verify DB connectivity; show a guided setup screen with
   instructions if unreachable.
 
-- [ ] **F46 — Cross-platform build**
+- [ ] **F43 — Cross-platform build**
   Tauri production build/signing for target OS(es).
 
-- [ ] **F47 — Visual polish pass**
+- [ ] **F44 — Visual polish pass**
   Final pass matching the reference UI's spacing, color tokens, and
   card/badge styling across all screens.
 
 ---
 
-## Deferred / Stretch (post-v1)
+## I. Deferred / Stretch (post-v1)
 
-- [ ] **F48 — Scan cancellation**
+- [ ] **F45 — Scan cancellation**
   Ability to cancel a running scan mid-way via a cancellation flag
   checked between batches.
 
-- [ ] **F49 — Real-time file-system watching**
+- [ ] **F46 — Real-time file-system watching**
   Auto-rescan or live-update on file changes (explicitly out of scope
   for v1 per the PRD).
 
-- [ ] **F50 — SSE/WebSocket-based scan updates**
+- [ ] **F47 — SSE/WebSocket-based scan updates**
   Replace polling with push-based updates — relevant rehearsal for
   RAMPART if pursued.
 

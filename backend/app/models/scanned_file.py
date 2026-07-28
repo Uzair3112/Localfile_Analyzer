@@ -19,4 +19,3 @@ class ScannedFile(Base):
     modified_at = Column(DateTime(timezone=True), nullable=True)
 
     scan = relationship("Scan", back_populates="files")
-    todos = relationship("Todo", back_populates="file", cascade="all, delete-orphan")

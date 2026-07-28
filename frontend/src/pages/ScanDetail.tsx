@@ -242,7 +242,7 @@ export default function ScanDetail() {
             <h2 className="dialog-title">Delete Scan #{scan.scan_id}?</h2>
             <div className="dialog-body">
               <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>
-                This will permanently remove this scan and all its data (files, duplicates, todos).
+                This will permanently remove this scan and all its data (files, duplicates).
               </p>
             </div>
             {deleteError && <div className="dialog-error">{deleteError}</div>}

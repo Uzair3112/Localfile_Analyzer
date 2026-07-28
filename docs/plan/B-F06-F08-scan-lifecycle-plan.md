@@ -228,7 +228,7 @@ Logic:
 
 **Important notes for F08 (simple walk, replaced later):**
 - Do NOT try to hash files yet (F22)
-- Do NOT extract TODO/FIXME yet (F26)
+
 - Do NOT batch-insert scanned_files rows yet (F21)
 - Use a simple `for file in Path(folder).rglob("*")` loop
 - Apply basic ignore rules inline:
