@@ -49,6 +49,11 @@ export const api = {
   listScans: (page = 1, pageSize = 20) =>
     request<ScanListResponse>(`/scans?page=${page}&page_size=${pageSize}`),
 
+  cancelScan: (scanId: number) =>
+    request<{ status: string; scan_id: number }>(`/scans/${scanId}/cancel`, {
+      method: "POST",
+    }),
+
   deleteScan: (scanId: number) =>
     request<{ status: string; scan_id: number }>(`/scans/${scanId}`, {
       method: "DELETE",

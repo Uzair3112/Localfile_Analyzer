@@ -18,6 +18,7 @@ function statusClass(status: string): string {
   return status === "completed" ? "completed"
     : status === "running" ? "running"
     : status === "failed" ? "failed"
+    : status === "cancelled" ? "cancelled"
     : "pending";
 }
 
@@ -105,6 +106,7 @@ export default function ScansList() {
                       {scan.status === "running" && "● Running"}
                       {scan.status === "pending" && "● Pending"}
                       {scan.status === "failed" && "● Failed"}
+                      {scan.status === "cancelled" && "● Cancelled"}
                     </span>
                   </td>
                   <td>{formatNumber(scan.total_files)}</td>

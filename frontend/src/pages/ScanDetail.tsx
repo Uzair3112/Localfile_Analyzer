@@ -26,6 +26,8 @@ export default function ScanDetail() {
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
 
   const [files, setFiles] = useState<ScannedFile[]>([]);
   const [filesTotal, setFilesTotal] = useState(0);
@@ -83,6 +85,19 @@ export default function ScanDetail() {
       .then(setLargestFolders)
       .catch(() => setLargestFolders(null));
   }, [id, scan?.status]);
+
+  const handleCancel = async () => {
+    if (!id) return;
+    setCancelling(true);
+    setCancelError(null);
+    try {
+      await api.cancelScan(id);
+    } catch (err) {
+      setCancelError(err instanceof Error ? err.message : "Failed to cancel scan");
+    } finally {
+      setCancelling(false);
+    }
+  };
 
   const handleDelete = async () => {
     if (!id) return;
@@ -152,6 +167,7 @@ export default function ScanDetail() {
   const statusClass = scan.status === "completed" ? "completed"
     : scan.status === "running" ? "running"
     : scan.status === "failed" ? "failed"
+    : scan.status === "cancelled" ? "cancelled"
     : "pending";
 
   const totalPages = Math.ceil(filesTotal / PAGE_SIZE);
@@ -170,6 +186,7 @@ export default function ScanDetail() {
           {scan.status === "running" && "● Running"}
           {scan.status === "pending" && "● Pending"}
           {scan.status === "failed" && "● Failed"}
+          {scan.status === "cancelled" && "● Cancelled"}
         </span>
       </div>
 
@@ -232,6 +249,10 @@ export default function ScanDetail() {
         </div>
       )}
 
+      {cancelError && (
+        <div className="scan-error-message" style={{ marginTop: 12 }}>{cancelError}</div>
+      )}
+
       {deleteError && (
         <div className="scan-error-message" style={{ marginTop: 12 }}>{deleteError}</div>
       )}
@@ -243,11 +264,20 @@ export default function ScanDetail() {
             View Settings Used
           </button>
         )}
+        {scan.status === "running" && (
+          <button
+            className="btn-warning"
+            onClick={handleCancel}
+            disabled={cancelling}
+            style={{ marginLeft: "auto" }}
+          >
+            {cancelling ? "Cancelling..." : "Cancel Scan"}
+          </button>
+        )}
         <button
           className="btn-danger"
           onClick={() => setShowConfirm(true)}
           disabled={deleting || scan.status === "running"}
-          style={{ marginLeft: "auto" }}
         >
           {deleting ? "Deleting..." : "Delete Scan"}
         </button>

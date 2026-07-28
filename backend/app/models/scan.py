@@ -10,6 +10,7 @@ class ScanStatus(str, enum.Enum):
     running = "running"
     completed = "completed"
     failed = "failed"
+    cancelled = "cancelled"
 
 
 class Scan(Base):

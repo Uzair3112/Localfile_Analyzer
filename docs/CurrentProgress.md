@@ -116,7 +116,7 @@
 
 ## I. Stretch / Deferred
 
-- `[ ]` **F45** — Scan cancellation
+- `[x]` **F45** — Scan cancellation
 - `[ ]` **F46** — Real-time file-system watching
 - `[ ]` **F47** — SSE/WebSocket-based scan updates
 
@@ -164,12 +164,14 @@ Localfile_Analyzer/
 │   │       ├── walker.py           # recursive walker with os.scandir + descend-time filtering
 │   │       ├── ignore_rules.py     # should_ignore_path (hidden, node_modules, custom globs)
 │   │       ├── hasher.py           # streamed SHA-256
-│   │       └── line_counter.py     # is_text_file + count_lines
+│   │       ├── line_counter.py     # is_text_file + count_lines
+│   │       └── cancellation.py     # CancellationToken registry (F45)
 │   ├── alembic/
 │   │   ├── env.py                  # configured with app models
 │   │   ├── script.py.mako
 │   │   └── versions/
-│   │       └── 18a95e2da077_create_all_tables.py
+│   │       ├── 18a95e2da077_create_all_tables.py
+│   │       └── 3ef1837b4107_add_cancelled_scan_status.py
 │   ├── alembic.ini
 │   ├── .env
 │   ├── .gitignore

@@ -22,7 +22,7 @@ export function useScanPolling(scanId: number | null) {
         setScan(data);
         setError(null);
 
-        if (data.status === "completed" || data.status === "failed") {
+        if (data.status === "completed" || data.status === "failed" || data.status === "cancelled") {
           if (intervalRef.current) {
             clearInterval(intervalRef.current);
             intervalRef.current = null;

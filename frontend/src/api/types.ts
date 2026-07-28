@@ -3,7 +3,7 @@ export interface HealthResponse {
   db: string;
 }
 
-export type ScanStatus = "pending" | "running" | "completed" | "failed";
+export type ScanStatus = "pending" | "running" | "completed" | "failed" | "cancelled";
 
 export interface ScanResponse {
   scan_id: number;

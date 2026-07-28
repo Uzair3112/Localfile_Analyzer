@@ -284,6 +284,11 @@ body {
   color: #721C24;
 }
 
+.scan-status-badge.cancelled {
+  background: #E5E7EB;
+  color: #6B7280;
+}
+
 .scan-stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -342,6 +347,27 @@ body {
 }
 
 .btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-warning {
+  background: #F59E0B;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.btn-warning:hover {
+  background: #D97706;
+}
+
+.btn-warning:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }

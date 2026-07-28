@@ -12,10 +12,12 @@ from app.models.duplicate import Duplicate
 from app.scanner.walker import walk_folder, extract_file_metadata
 from app.scanner.line_counter import is_text_file, count_lines
 from app.scanner.hasher import compute_sha256
+from app.scanner.cancellation import is_cancellation_requested, clear_cancellation
 
 logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 500
+_CANCEL_CHECK_INTERVAL = 100
 
 
 async def _flush_batch(session: AsyncSession, batch: list[dict]):
@@ -79,7 +81,7 @@ def _scan_folder_sync(
     scan_id: int,
     folder_path: str,
     settings: dict,
-) -> tuple[list[dict], int, int, int]:
+) -> tuple[list[dict], int, int, int, bool]:
     rows = []
     file_count = 0
     size_acc = 0
@@ -115,6 +117,18 @@ def _scan_folder_sync(
             size_map[size] = []
         size_map[size].append(idx)
 
+        if file_count % _CANCEL_CHECK_INTERVAL == 0:
+            if is_cancellation_requested(scan_id):
+                logger.info(
+                    "Scan %s cancelled mid-walk after %d files",
+                    scan_id, file_count,
+                )
+                return rows, file_count, size_acc, lines_acc, True
+
+    if is_cancellation_requested(scan_id):
+        logger.info("Cancellation requested before hash pass for scan %s", scan_id)
+        return rows, file_count, size_acc, lines_acc, True
+
     candidate_sizes = {s for s, indices in size_map.items() if len(indices) >= 2}
     total_candidates = sum(len(size_map[s]) for s in candidate_sizes)
 
@@ -132,7 +146,7 @@ def _scan_folder_sync(
             except OSError as exc:
                 logger.warning("Could not hash %s: %s", full_path, exc)
 
-    return rows, file_count, size_acc, lines_acc
+    return rows, file_count, size_acc, lines_acc, False
 
 
 async def run_scan(
@@ -153,10 +167,34 @@ async def run_scan(
 
         settings = scan.settings_snapshot or {}
 
+        if is_cancellation_requested(scan_id):
+            scan.status = ScanStatus.cancelled
+            scan.completed_at = datetime.now(timezone.utc)
+            await session.commit()
+            logger.info("Scan %s cancelled before any files were processed", scan_id)
+            return
+
         loop = asyncio.get_running_loop()
-        rows, total_files, total_size, total_lines = await loop.run_in_executor(
+        rows, total_files, total_size, total_lines, was_cancelled = await loop.run_in_executor(
             None, _scan_folder_sync, scan_id, scan.folder_path, settings,
         )
+
+        if was_cancelled or is_cancellation_requested(scan_id):
+            for i in range(0, len(rows), BATCH_SIZE):
+                chunk = rows[i : i + BATCH_SIZE]
+                await _flush_batch(session, chunk)
+
+            scan.total_files = total_files
+            scan.total_size = total_size
+            scan.total_lines = total_lines
+            scan.status = ScanStatus.cancelled
+            scan.completed_at = datetime.now(timezone.utc)
+            await session.commit()
+            logger.info(
+                "Scan %s cancelled: %d files processed, %d bytes, %d lines",
+                scan_id, total_files, total_size, total_lines,
+            )
+            return
 
         for i in range(0, len(rows), BATCH_SIZE):
             chunk = rows[i : i + BATCH_SIZE]
@@ -192,4 +230,5 @@ async def run_scan(
         except Exception:
             logger.exception("Failed to record scan failure for %s", scan_id)
     finally:
+        clear_cancellation(scan_id)
         await session.close()

@@ -26,6 +26,7 @@ from app.schemas.scan import (
     CleanupSummaryResponse,
 )
 from app.scanner.runner import run_scan
+from app.scanner.cancellation import request_cancellation
 from app.models.scanned_file import ScannedFile
 from app.models.duplicate import Duplicate
 
@@ -151,6 +152,27 @@ async def delete_scan(
     await db.delete(scan)
     await db.commit()
     return {"status": "deleted", "scan_id": scan_id}
+
+
+@router.post("/{scan_id}/cancel", status_code=202)
+async def cancel_scan(
+    scan_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(Scan).where(Scan.id == scan_id))
+    scan = result.scalar_one_or_none()
+    if not scan:
+        return _error_response("SCAN_NOT_FOUND", f"No scan exists with id {scan_id}", status=404)
+
+    if scan.status != ScanStatus.running:
+        return _error_response(
+            "SCAN_NOT_RUNNING",
+            f"Scan {scan_id} is {scan.status.value}, not running",
+            status=409,
+        )
+
+    request_cancellation(scan_id)
+    return {"status": "cancellation_requested", "scan_id": scan_id}
 
 
 @router.get("/{scan_id}/files")

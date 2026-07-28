@@ -211,7 +211,7 @@ Status legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 ## I. Deferred / Stretch (post-v1)
 
-- [ ] **F45 — Scan cancellation**
+- [x] **F45 — Scan cancellation**
   Ability to cancel a running scan mid-way via a cancellation flag
   checked between batches.
 
