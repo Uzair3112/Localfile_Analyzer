@@ -1,6 +1,6 @@
 # Current Progress — Local File Analyzer
 
- **Last updated:** 2026-07-27 (updated after Phase B implementation)
+ **Last updated:** 2026-07-28
 
 ---
 
@@ -86,12 +86,12 @@
 
 ## F. Dashboard & Reporting
 
-- `[ ]` **F30** — Dashboard layout
-- `[ ]` **F31** — Stat cards
-- `[ ]` **F32** — Overview chart
-- `[ ]` **F33** — Largest files list
-- `[ ]` **F34** — Largest folders list
-- `[ ]` **F35** — Recent scans table
+- `[x]` **F30** — Dashboard layout
+- `[x]` **F31** — Stat cards
+- `[x]` **F32** — Overview chart
+- `[x]` **F33** — Largest files list
+- `[x]` **F34** — Largest folders list
+- `[x]` **F35** — Recent scans table
 - `[ ]` **F36** — Scan history / comparison view
 - `[ ]` **F37** — Cleanup goals widget *(stretch)*
 
@@ -99,9 +99,9 @@
 
 ## G. Settings
 
-- `[ ]` **F38** — Settings API
-- `[ ]` **F39** — Settings UI page
-- `[ ]` **F40** — Per-scan settings override
+- `[x]` **F38** — Settings API
+- `[x]` **F39** — Settings UI page
+- `[x]` **F40** — Per-scan settings override
 
 ---
 

@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import type { ScanResponse, ExtensionBreakdownItem } from "../api/types";
+import OverviewChart from "../components/dashboard/OverviewChart";
 
 function formatBytes(bytes: number): string {
   if (bytes === 0) return "0 B";
@@ -90,6 +91,8 @@ export default function Dashboard() {
         </div>
       </div>
 
+      <OverviewChart scans={allScans} />
+
       <div style={{ marginTop: 32 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
           <h2 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>Recent Scans</h2>
@@ -128,7 +131,7 @@ export default function Dashboard() {
                     className="scans-table-row"
                     onClick={() => navigate(`/scans/${scan.scan_id}`)}
                   >
-                    <td>#{scan.scan_id}</td>
+                    <td>{scan.scan_id}</td>
                     <td className="scans-table-path" title={scan.folder_path}>{scan.folder_path}</td>
                     <td>
                       <span className={`scan-status-badge ${statusClass(scan.status)}`}>
@@ -177,7 +180,7 @@ export default function Dashboard() {
           <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>
             Top Extensions
             <span style={{ fontSize: 14, fontWeight: 400, color: "var(--color-text-muted)", marginLeft: 8 }}>
-              from #{latestCompletedScan.scan_id}
+              from scan {latestCompletedScan.scan_id}
             </span>
           </h2>
           <div className="extensions-card">

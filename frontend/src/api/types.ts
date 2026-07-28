@@ -100,3 +100,21 @@ export interface ExtensionBreakdownResponse {
   total_files: number;
   files_without_extension: number;
 }
+
+export interface LargestFolderItem {
+  folder_path: string;
+  file_count: number;
+  total_size: number;
+}
+
+export interface LargestFoldersResponse {
+  folders: LargestFolderItem[];
+  total_folders: number;
+}
+
+export interface CleanupSummaryResponse {
+  duplicate_groups: number;
+  duplicate_files: number;
+  large_files_10mb_plus: number;
+  files_without_extension: number;
+}

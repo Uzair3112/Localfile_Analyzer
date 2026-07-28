@@ -98,3 +98,21 @@ class ExtensionBreakdownResponse(BaseModel):
     total_extensions: int
     total_files: int
     files_without_extension: int
+
+
+class LargestFolderItem(BaseModel):
+    folder_path: str
+    file_count: int
+    total_size: int
+
+
+class LargestFoldersResponse(BaseModel):
+    folders: list[LargestFolderItem]
+    total_folders: int
+
+
+class CleanupSummaryResponse(BaseModel):
+    duplicate_groups: int = 0
+    duplicate_files: int = 0
+    large_files_10mb_plus: int = 0
+    files_without_extension: int = 0

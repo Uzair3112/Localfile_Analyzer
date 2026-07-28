@@ -6,6 +6,8 @@ import type {
   DuplicateListResponse,
   SettingsResponse,
   ExtensionBreakdownResponse,
+  LargestFoldersResponse,
+  CleanupSummaryResponse,
 } from "./types";
 
 const API_BASE = "http://127.0.0.1:8000/api/v1";
@@ -81,6 +83,14 @@ export const api = {
     request<ExtensionBreakdownResponse>(
       `/scans/${scanId}/extensions${limit ? `?limit=${limit}` : ""}`,
     ),
+
+  getScanLargestFolders: (scanId: number, limit?: number) =>
+    request<LargestFoldersResponse>(
+      `/scans/${scanId}/largest-folders${limit ? `?limit=${limit}` : ""}`,
+    ),
+
+  getScanCleanupSummary: (scanId: number) =>
+    request<CleanupSummaryResponse>(`/scans/${scanId}/cleanup-summary`),
 
   getSettings: () => request<SettingsResponse>("/settings"),
 

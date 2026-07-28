@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useScanPolling } from "../hooks/useScanPolling";
 import { api } from "../api/client";
-import type { ScannedFile } from "../api/types";
+import type { ScannedFile, LargestFoldersResponse } from "../api/types";
 
 function formatBytes(bytes: number): string {
   if (bytes === 0) return "0 B";
@@ -41,6 +41,9 @@ export default function ScanDetail() {
   const [overrideNodeModules, setOverrideNodeModules] = useState(true);
   const [overrideMaxSize, setOverrideMaxSize] = useState(52428800);
 
+  const [largestFiles, setLargestFiles] = useState<ScannedFile[] | null>(null);
+  const [largestFolders, setLargestFolders] = useState<LargestFoldersResponse | null>(null);
+
   const fetchFiles = useCallback(async () => {
     if (!id || scan?.status !== "completed") return;
     setFilesLoading(true);
@@ -66,6 +69,20 @@ export default function ScanDetail() {
   useEffect(() => {
     fetchFiles();
   }, [fetchFiles]);
+
+  useEffect(() => {
+    if (!id || scan?.status !== "completed") {
+      setLargestFiles(null);
+      setLargestFolders(null);
+      return;
+    }
+    api.getScanFiles(id, { sort: "size", order: "desc", page_size: 5 })
+      .then((data) => setLargestFiles(data.files))
+      .catch(() => setLargestFiles(null));
+    api.getScanLargestFolders(id, 5)
+      .then(setLargestFolders)
+      .catch(() => setLargestFolders(null));
+  }, [id, scan?.status]);
 
   const handleDelete = async () => {
     if (!id) return;
@@ -106,7 +123,7 @@ export default function ScanDetail() {
   if (loading && !scan) {
     return (
       <div className="page">
-        <h1>Scan #{id}</h1>
+        <h1>Scan {id}</h1>
         <p style={{ marginTop: 16, color: "var(--color-text-muted)" }}>Loading scan...</p>
       </div>
     );
@@ -115,7 +132,7 @@ export default function ScanDetail() {
   if (error && !scan) {
     return (
       <div className="page">
-        <h1>Scan #{id}</h1>
+        <h1>Scan {id}</h1>
         <div className="scan-error-message" style={{ marginTop: 16 }}>{error}</div>
         <Link to="/" style={{ display: "inline-block", marginTop: 16, color: "var(--color-primary)" }}>Back to Dashboard</Link>
       </div>
@@ -125,7 +142,7 @@ export default function ScanDetail() {
   if (!scan) {
     return (
       <div className="page">
-        <h1>Scan #{id}</h1>
+        <h1>Scan {id}</h1>
         <p style={{ marginTop: 16, color: "var(--color-text-muted)" }}>Scan not found.</p>
         <Link to="/" style={{ display: "inline-block", marginTop: 16, color: "var(--color-primary)" }}>Back to Dashboard</Link>
       </div>
@@ -147,7 +164,7 @@ export default function ScanDetail() {
   return (
     <div className="page">
       <div className="scan-detail-header">
-        <h1>Scan #{scan.scan_id}</h1>
+        <h1>Scan {scan.scan_id}</h1>
         <span className={`scan-status-badge ${statusClass}`}>
           {scan.status === "completed" && "● Completed"}
           {scan.status === "running" && "● Running"}
@@ -239,7 +256,7 @@ export default function ScanDetail() {
       {showConfirm && (
         <div className="dialog-overlay" onClick={() => setShowConfirm(false)}>
           <div className="dialog" onClick={(e) => e.stopPropagation()}>
-            <h2 className="dialog-title">Delete Scan #{scan.scan_id}?</h2>
+            <h2 className="dialog-title">Delete Scan {scan.scan_id}?</h2>
             <div className="dialog-body">
               <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>
                 This will permanently remove this scan and all its data (files, duplicates).
@@ -357,6 +374,48 @@ export default function ScanDetail() {
                   >
                     Next
                   </button>
+                </div>
+              )}
+
+              {largestFiles && largestFiles.length > 0 && (
+                <div style={{ marginTop: 32 }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Largest Files</h3>
+                  <div className="extensions-card">
+                    {largestFiles.map((f, i) => (
+                      <div key={f.id} className="largest-file-row">
+                        <span className="largest-file-rank">{i + 1}.</span>
+                        <div className="largest-file-info">
+                          <div className="largest-file-name" title={f.filename}>{f.filename}</div>
+                          <div className="largest-file-path" title={f.full_path}>{f.full_path}</div>
+                        </div>
+                        <span className="largest-file-ext">{f.extension ?? "\u2014"}</span>
+                        <span className="largest-file-size">{formatBytes(f.size)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {largestFolders && largestFolders.folders.length > 0 && (
+                <div style={{ marginTop: 32 }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Largest Folders</h3>
+                  <div className="extensions-card">
+                    {largestFolders.folders.map((f, i) => {
+                      const displayPath = f.folder_path.startsWith(scan.folder_path)
+                        ? f.folder_path.slice(scan.folder_path.length) || "/"
+                        : f.folder_path;
+                      return (
+                        <div key={f.folder_path} className="largest-folder-row">
+                          <span className="largest-folder-rank">{i + 1}.</span>
+                          <div className="largest-folder-info">
+                            <div className="largest-folder-name" title={f.folder_path}>{displayPath}</div>
+                          </div>
+                          <span className="largest-folder-count">{formatNumber(f.file_count)} files</span>
+                          <span className="largest-folder-size">{formatBytes(f.total_size)}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </>

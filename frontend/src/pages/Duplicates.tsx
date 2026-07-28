@@ -58,7 +58,7 @@ export default function Duplicates() {
 
   return (
     <div className="page">
-      <h1>Duplicates {scanId ? <span style={{ fontSize: 14, fontWeight: 400, color: "var(--color-text-muted)" }}>(Scan #{scanId})</span> : null}</h1>
+      <h1>Duplicates {scanId ? <span style={{ fontSize: 14, fontWeight: 400, color: "var(--color-text-muted)" }}>(Scan {scanId})</span> : null}</h1>
 
       {!scanId && !loading && (
         <p style={{ marginTop: 16, color: "var(--color-text-muted)" }}>

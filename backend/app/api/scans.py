@@ -21,6 +21,9 @@ from app.schemas.scan import (
     DuplicateListResponse,
     ExtensionBreakdownItem,
     ExtensionBreakdownResponse,
+    LargestFoldersResponse,
+    LargestFolderItem,
+    CleanupSummaryResponse,
 )
 from app.scanner.runner import run_scan
 from app.models.scanned_file import ScannedFile
@@ -347,4 +350,100 @@ async def get_scan_extensions(
         total_extensions=total_extensions,
         total_files=total_files,
         files_without_extension=files_without_ext,
+    )
+
+
+@router.get("/{scan_id}/largest-folders")
+async def get_scan_largest_folders(
+    scan_id: int,
+    limit: int = 10,
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(Scan).where(Scan.id == scan_id))
+    scan = result.scalar_one_or_none()
+    if not scan:
+        return _error_response("SCAN_NOT_FOUND", f"No scan exists with id {scan_id}", status=404)
+
+    limit = max(1, min(limit, 50))
+
+    from collections import defaultdict
+    from pathlib import Path
+
+    rows_result = await db.execute(
+        select(ScannedFile.id, ScannedFile.full_path, ScannedFile.size)
+        .where(ScannedFile.scan_id == scan_id)
+    )
+    all_rows = rows_result.all()
+
+    dir_map: dict[str, dict] = defaultdict(lambda: {"file_count": 0, "total_size": 0})
+    for row in all_rows:
+        parent = str(Path(row.full_path).parent)
+        dir_map[parent]["file_count"] += 1
+        dir_map[parent]["total_size"] += (row.size or 0)
+
+    sorted_dirs = sorted(dir_map.items(), key=lambda x: -x[1]["total_size"])[:limit]
+
+    folders = [
+        LargestFolderItem(
+            folder_path=path,
+            file_count=info["file_count"],
+            total_size=info["total_size"],
+        )
+        for path, info in sorted_dirs
+    ]
+
+    return LargestFoldersResponse(
+        folders=folders,
+        total_folders=len(dir_map),
+    )
+
+
+@router.get("/{scan_id}/cleanup-summary")
+async def get_scan_cleanup_summary(
+    scan_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(Scan).where(Scan.id == scan_id))
+    scan = result.scalar_one_or_none()
+    if not scan:
+        return _error_response("SCAN_NOT_FOUND", f"No scan exists with id {scan_id}", status=404)
+
+    if scan.status != ScanStatus.completed:
+        return _error_response("SCAN_NOT_COMPLETED", "Cleanup summary is available only after scan completes")
+
+    dup_count = await db.execute(
+        select(func.count(func.distinct(Duplicate.hash)))
+        .where(Duplicate.scan_id == scan_id)
+    )
+    dup_groups = dup_count.scalar() or 0
+
+    dup_file_result = await db.execute(
+        select(func.count(func.distinct(Duplicate.file1_id)))
+        .where(Duplicate.scan_id == scan_id)
+    )
+    dup_files = dup_file_result.scalar() or 0
+
+    large_files_result = await db.execute(
+        select(func.count(ScannedFile.id))
+        .where(
+            ScannedFile.scan_id == scan_id,
+            ScannedFile.size > 10_485_760,
+        )
+    )
+    large_files = large_files_result.scalar() or 0
+
+    no_ext_result = await db.execute(
+        select(func.count(ScannedFile.id))
+        .where(
+            ScannedFile.scan_id == scan_id,
+            ScannedFile.extension.is_(None),
+        )
+    )
+    no_ext_files = no_ext_result.scalar() or 0
+
+    return CleanupSummaryResponse(
+        duplicate_groups=dup_groups,
+        duplicate_files=dup_files,
+        large_files_10mb_plus=large_files,
+        files_without_extension=no_ext_files,
     )

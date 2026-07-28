@@ -142,25 +142,25 @@ Status legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 ## F. Dashboard & Reporting
 
-- [ ] **F30 — Dashboard layout**
+- [x] **F30 — Dashboard layout**
   Sidebar + topbar + welcome header + "New Scan" primary action, per the
   reference UI style.
 
-- [ ] **F31 — Stat cards**
+- [x] **F31 — Stat cards**
   Reusable `StatCard` component: Total Files, Total Size, Duplicate
   Files, with icon badges and delta-vs-previous-scan indicators.
 
-- [ ] **F32 — Overview chart**
+- [x] **F32 — Overview chart**
   Bar chart (Recharts) of files/lines scanned over time or per scan run,
   with hover tooltips.
 
-- [ ] **F33 — Largest files list**
+- [x] **F33 — Largest files list**
   Query + UI card showing the top N largest files in a scan.
 
-- [ ] **F34 — Largest folders list**
+- [x] **F34 — Largest folders list**
   Aggregate file sizes by parent directory; show top N largest folders.
 
-- [ ] **F35 — Recent scans table**
+- [x] **F35 — Recent scans table**
   Dashboard table listing recent scans with folder path, date, file
   count, and status pill (Success/Running/Failed).
 
@@ -176,15 +176,15 @@ Status legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 ## G. Settings
 
-- [ ] **F38 — Settings API**
+- [x] **F38 — Settings API**
   `GET /settings` and `PUT /settings` for global scan settings
   (`ignore_hidden`, `ignore_node_modules`, `max_file_size`,
   `custom_ignore_globs`).
 
-- [ ] **F39 — Settings UI page**
+- [x] **F39 — Settings UI page**
   Form for editing global defaults.
 
-- [ ] **F40 — Per-scan settings override**
+- [x] **F40 — Per-scan settings override**
   "New Scan" dialog allows overriding global defaults for a single scan;
   override is snapshotted into `scans.settings_snapshot` (JSONB).
 

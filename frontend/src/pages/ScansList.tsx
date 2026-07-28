@@ -97,7 +97,7 @@ export default function ScansList() {
                   className="scans-table-row"
                   onClick={() => navigate(`/scans/${scan.scan_id}`)}
                 >
-                  <td>#{scan.scan_id}</td>
+                  <td>{scan.scan_id}</td>
                   <td className="scans-table-path" title={scan.folder_path}>{scan.folder_path}</td>
                   <td>
                     <span className={`scan-status-badge ${statusClass(scan.status)}`}>
