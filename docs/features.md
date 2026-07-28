@@ -122,19 +122,19 @@ Status legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 ## E. File Browsing & Search
 
-- [ ] **F26 — File list API**
+- [x] **F26 — File list API**
   `GET /scans/{id}/files` with filtering (extension, search term),
   sorting (size, lines, name), and pagination.
 
-- [ ] **F27 — File table UI**
+- [x] **F27 — File table UI**
   Sortable/searchable/paginated table component (`FileTable`) on the Scan
   Detail page.
 
-- [ ] **F28 — Extension breakdown API**
+- [x] **F28 — Extension breakdown API**
   `GET /scans/{id}/extensions` — count, total size, % of total per
   extension.
 
-- [ ] **F29 — Extension breakdown UI**
+- [x] **F29 — Extension breakdown UI**
   "Top Extensions" card on the dashboard (styled per the wallet-card
   reference pattern).
 

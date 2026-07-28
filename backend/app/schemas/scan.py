@@ -82,3 +82,19 @@ class ErrorDetail(BaseModel):
 
 class ErrorResponse(BaseModel):
     error: ErrorDetail
+
+
+class ExtensionBreakdownItem(BaseModel):
+    extension: str
+    count: int
+    total_size: int
+    percentage: float
+
+    model_config = {"from_attributes": True}
+
+
+class ExtensionBreakdownResponse(BaseModel):
+    extensions: list[ExtensionBreakdownItem]
+    total_extensions: int
+    total_files: int
+    files_without_extension: int

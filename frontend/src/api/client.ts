@@ -5,6 +5,7 @@ import type {
   ScannedFileListResponse,
   DuplicateListResponse,
   SettingsResponse,
+  ExtensionBreakdownResponse,
 } from "./types";
 
 const API_BASE = "http://127.0.0.1:8000/api/v1";
@@ -75,6 +76,11 @@ export const api = {
 
   getScanDuplicates: (scanId: number) =>
     request<DuplicateListResponse>(`/scans/${scanId}/duplicates`),
+
+  getScanExtensions: (scanId: number, limit?: number) =>
+    request<ExtensionBreakdownResponse>(
+      `/scans/${scanId}/extensions${limit ? `?limit=${limit}` : ""}`,
+    ),
 
   getSettings: () => request<SettingsResponse>("/settings"),
 

@@ -19,6 +19,8 @@ from app.schemas.scan import (
     DuplicateFileInfo,
     DuplicateGroup,
     DuplicateListResponse,
+    ExtensionBreakdownItem,
+    ExtensionBreakdownResponse,
 )
 from app.scanner.runner import run_scan
 from app.models.scanned_file import ScannedFile
@@ -260,4 +262,89 @@ async def get_scan_duplicates(
         total_groups=len(groups_list),
         total_duplicates=total_dup_files,
         total_wasted_bytes=total_wasted,
+    )
+
+
+@router.get("/{scan_id}/extensions")
+async def get_scan_extensions(
+    scan_id: int,
+    limit: int = 15,
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(Scan).where(Scan.id == scan_id))
+    scan = result.scalar_one_or_none()
+    if not scan:
+        return _error_response("SCAN_NOT_FOUND", f"No scan exists with id {scan_id}", status=404)
+
+    limit = max(1, min(limit, 100))
+
+    total_result = await db.execute(
+        select(func.count(ScannedFile.id)).where(ScannedFile.scan_id == scan_id)
+    )
+    total_files = total_result.scalar() or 0
+
+    if total_files == 0:
+        return ExtensionBreakdownResponse(
+            extensions=[],
+            total_extensions=0,
+            total_files=0,
+            files_without_extension=0,
+        )
+
+    null_ext_result = await db.execute(
+        select(func.count(ScannedFile.id)).where(
+            ScannedFile.scan_id == scan_id,
+            ScannedFile.extension.is_(None),
+        )
+    )
+    files_without_ext = null_ext_result.scalar() or 0
+    files_with_ext = total_files - files_without_ext
+
+    if files_with_ext == 0:
+        return ExtensionBreakdownResponse(
+            extensions=[],
+            total_extensions=0,
+            total_files=total_files,
+            files_without_extension=files_without_ext,
+        )
+
+    grouped_result = await db.execute(
+        select(
+            ScannedFile.extension,
+            func.count(ScannedFile.id).label("count"),
+            func.sum(ScannedFile.size).label("total_size"),
+        )
+        .where(
+            ScannedFile.scan_id == scan_id,
+            ScannedFile.extension.isnot(None),
+        )
+        .group_by(ScannedFile.extension)
+        .order_by(func.count(ScannedFile.id).desc(), func.sum(ScannedFile.size).desc())
+        .limit(limit)
+    )
+    rows = grouped_result.all()
+
+    extensions = [
+        ExtensionBreakdownItem(
+            extension=row.extension,
+            count=row.count,
+            total_size=row.total_size or 0,
+            percentage=round((row.count / files_with_ext) * 100, 2),
+        )
+        for row in rows
+    ]
+
+    total_extensions_result = await db.execute(
+        select(func.count(func.distinct(ScannedFile.extension))).where(
+            ScannedFile.scan_id == scan_id,
+            ScannedFile.extension.isnot(None),
+        )
+    )
+    total_extensions = total_extensions_result.scalar() or 0
+
+    return ExtensionBreakdownResponse(
+        extensions=extensions,
+        total_extensions=total_extensions,
+        total_files=total_files,
+        files_without_extension=files_without_ext,
     )

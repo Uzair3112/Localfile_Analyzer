@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
-import type { ScanResponse } from "../api/types";
+import type { ScanResponse, ExtensionBreakdownItem } from "../api/types";
 
 function formatBytes(bytes: number): string {
   if (bytes === 0) return "0 B";
@@ -21,10 +21,19 @@ function statusClass(status: string): string {
     : "pending";
 }
 
+const EXT_COLORS = [
+  "#1F8A5A", "#E5484D", "#2563EB", "#8B5CF6",
+  "#D97706", "#0891B2", "#65A30D", "#DB2777",
+];
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const [allScans, setAllScans] = useState<ScanResponse[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [extensions, setExtensions] = useState<ExtensionBreakdownItem[] | null>(null);
+  const [extLoading, setExtLoading] = useState(false);
+  const [extError, setExtError] = useState<string | null>(null);
 
   useEffect(() => {
     api.listScans(1, 1000)
@@ -34,6 +43,29 @@ export default function Dashboard() {
       })
       .catch(() => setLoading(false));
   }, []);
+
+  const latestCompletedScan = useMemo(() => {
+    const completed = allScans.filter((s) => s.status === "completed");
+    if (completed.length === 0) return null;
+    return completed.reduce((a, b) => (a.scan_id > b.scan_id ? a : b));
+  }, [allScans]);
+
+  useEffect(() => {
+    if (!latestCompletedScan) {
+      setExtensions(null);
+      setExtLoading(false);
+      return;
+    }
+    setExtLoading(true);
+    setExtError(null);
+    api.getScanExtensions(latestCompletedScan.scan_id, 8)
+      .then((data) => setExtensions(data.extensions))
+      .catch((err) => {
+        setExtError(err instanceof Error ? err.message : "Failed to load extensions");
+        setExtensions(null);
+      })
+      .finally(() => setExtLoading(false));
+  }, [latestCompletedScan?.scan_id]);
 
   const recentScans = allScans.slice(0, 5);
   const totalFiles = allScans.reduce((s, r) => s + r.total_files, 0);
@@ -121,6 +153,71 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      {extLoading && (
+        <div style={{ marginTop: 32 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Top Extensions</h2>
+          <div className="extensions-card">
+            <p style={{ color: "var(--color-text-muted)", margin: 0 }}>Loading extensions...</p>
+          </div>
+        </div>
+      )}
+
+      {extError && !extLoading && (
+        <div style={{ marginTop: 32 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Top Extensions</h2>
+          <div className="extensions-card">
+            <p style={{ color: "var(--color-danger)", margin: 0, fontSize: 14 }}>{extError}</p>
+          </div>
+        </div>
+      )}
+
+      {!extLoading && !extError && latestCompletedScan && extensions && extensions.length > 0 && (
+        <div style={{ marginTop: 32 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>
+            Top Extensions
+            <span style={{ fontSize: 14, fontWeight: 400, color: "var(--color-text-muted)", marginLeft: 8 }}>
+              from #{latestCompletedScan.scan_id}
+            </span>
+          </h2>
+          <div className="extensions-card">
+            {extensions.map((ext, i) => (
+              <div key={ext.extension} className="extension-row">
+                <div className="extension-icon" style={{ backgroundColor: EXT_COLORS[i % EXT_COLORS.length] }}>
+                  {ext.extension.substring(0, 2).toUpperCase()}
+                </div>
+                <div className="extension-info">
+                  <div className="extension-name">.{ext.extension}</div>
+                  <div className="extension-bar-track">
+                    <div
+                      className="extension-bar-fill"
+                      style={{ width: `${Math.max(ext.percentage, 1)}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="extension-stats">
+                  <div className="extension-count">{formatNumber(ext.count)} files</div>
+                  <div className="extension-pct">{ext.percentage.toFixed(1)}%</div>
+                </div>
+                <div className="extension-size">{formatBytes(ext.total_size)}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {!extLoading && !extError && latestCompletedScan && extensions && extensions.length === 0 && (
+        <div style={{ marginTop: 32 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Top Extensions</h2>
+          <div className="extensions-card">
+            <p style={{ color: "var(--color-text-muted)", margin: 0, fontSize: 14 }}>
+              {latestCompletedScan.total_files === 0
+                ? "No files found in the latest scan."
+                : "No file extensions detected."}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

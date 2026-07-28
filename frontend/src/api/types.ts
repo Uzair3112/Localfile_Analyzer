@@ -86,3 +86,17 @@ export interface ScanSettings {
   max_file_size: number;
   custom_ignore_globs: string[];
 }
+
+export interface ExtensionBreakdownItem {
+  extension: string;
+  count: number;
+  total_size: number;
+  percentage: number;
+}
+
+export interface ExtensionBreakdownResponse {
+  extensions: ExtensionBreakdownItem[];
+  total_extensions: number;
+  total_files: number;
+  files_without_extension: number;
+}

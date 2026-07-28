@@ -77,10 +77,10 @@
 
 ## E. File Browsing & Search
 
-- `[ ]` **F26** — File list API
-- `[ ]` **F27** — File table UI
-- `[ ]` **F28** — Extension breakdown API
-- `[ ]` **F29** — Extension breakdown UI
+- `[x]` **F26** — File list API
+- `[x]` **F27** — File table UI
+- `[x]` **F28** — Extension breakdown API
+- `[x]` **F29** — Extension breakdown UI
 
 ---
 
