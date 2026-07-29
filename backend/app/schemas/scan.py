@@ -116,3 +116,22 @@ class CleanupSummaryResponse(BaseModel):
     duplicate_files: int = 0
     large_files_10mb_plus: int = 0
     files_without_extension: int = 0
+
+
+class DuplicateFileDeleteRequest(BaseModel):
+    file_ids: list[int]
+
+
+class DeletedFileInfo(BaseModel):
+    id: int
+    filename: str
+    full_path: str
+    success: bool
+    error: Optional[str] = None
+
+
+class DuplicateDeleteResponse(BaseModel):
+    deleted: list[DeletedFileInfo]
+    failed: list[DeletedFileInfo]
+    total_deleted: int
+    total_failed: int

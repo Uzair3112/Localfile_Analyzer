@@ -112,6 +112,21 @@ export interface LargestFoldersResponse {
   total_folders: number;
 }
 
+export interface DeletedFileInfo {
+  id: number;
+  filename: string;
+  full_path: string;
+  success: boolean;
+  error: string | null;
+}
+
+export interface DuplicateDeleteResponse {
+  deleted: DeletedFileInfo[];
+  failed: DeletedFileInfo[];
+  total_deleted: number;
+  total_failed: number;
+}
+
 export interface CleanupSummaryResponse {
   duplicate_groups: number;
   duplicate_files: number;

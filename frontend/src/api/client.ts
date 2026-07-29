@@ -4,6 +4,7 @@ import type {
   ScanListResponse,
   ScannedFileListResponse,
   DuplicateListResponse,
+  DuplicateDeleteResponse,
   SettingsResponse,
   ExtensionBreakdownResponse,
   LargestFoldersResponse,
@@ -83,6 +84,12 @@ export const api = {
 
   getScanDuplicates: (scanId: number) =>
     request<DuplicateListResponse>(`/scans/${scanId}/duplicates`),
+
+  deleteDuplicateFiles: (scanId: number, fileIds: number[]) =>
+    request<DuplicateDeleteResponse>(`/scans/${scanId}/duplicates/delete`, {
+      method: "POST",
+      body: JSON.stringify({ file_ids: fileIds }),
+    }),
 
   getScanExtensions: (scanId: number, limit?: number) =>
     request<ExtensionBreakdownResponse>(

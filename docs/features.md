@@ -118,23 +118,28 @@ Status legend: `[ ]` not started · `[~]` in progress · `[x]` done
   `GET /scans/{id}/duplicates` + frontend Duplicates page listing grouped
   duplicate files with paths and sizes.
 
+- [ ] **F26 — Duplicate file selection & deletion**
+  Each file row in a duplicate group on the Duplicates page shows a
+  checkbox; a single "Delete Selected" button deletes all checked files
+  from disk and removes their DB records on click.
+
 ---
 
 ## E. File Browsing & Search
 
-- [x] **F26 — File list API**
+- [x] **F27 — File list API**
   `GET /scans/{id}/files` with filtering (extension, search term),
   sorting (size, lines, name), and pagination.
 
-- [x] **F27 — File table UI**
+- [x] **F28 — File table UI**
   Sortable/searchable/paginated table component (`FileTable`) on the Scan
   Detail page.
 
-- [x] **F28 — Extension breakdown API**
+- [x] **F29 — Extension breakdown API**
   `GET /scans/{id}/extensions` — count, total size, % of total per
   extension.
 
-- [x] **F29 — Extension breakdown UI**
+- [x] **F30 — Extension breakdown UI**
   "Top Extensions" card on the dashboard (styled per the wallet-card
   reference pattern).
 
@@ -142,33 +147,33 @@ Status legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 ## F. Dashboard & Reporting
 
-- [x] **F30 — Dashboard layout**
+- [x] **F31 — Dashboard layout**
   Sidebar + topbar + welcome header + "New Scan" primary action, per the
   reference UI style.
 
-- [x] **F31 — Stat cards**
+- [x] **F32 — Stat cards**
   Reusable `StatCard` component: Total Files, Total Size, Duplicate
   Files, with icon badges and delta-vs-previous-scan indicators.
 
-- [x] **F32 — Overview chart**
+- [x] **F33 — Overview chart**
   Bar chart (Recharts) of files/lines scanned over time or per scan run,
   with hover tooltips.
 
-- [x] **F33 — Largest files list**
+- [x] **F34 — Largest files list**
   Query + UI card showing the top N largest files in a scan.
 
-- [x] **F34 — Largest folders list**
+- [x] **F35 — Largest folders list**
   Aggregate file sizes by parent directory; show top N largest folders.
 
-- [x] **F35 — Recent scans table**
+- [x] **F36 — Recent scans table**
   Dashboard table listing recent scans with folder path, date, file
   count, and status pill (Success/Running/Failed).
 
-- [ ] **F36 — Scan history / comparison view**
+- [ ] **F37 — Scan history / comparison view**
   Dedicated view listing all past scans, allowing browsing/comparison
   across runs (including for the same folder over time).
 
-- [ ] **F37 — Cleanup goals widget** *(stretch)*
+- [ ] **F38 — Cleanup goals widget** *(stretch)*
   UI card summarizing actionable cleanup items (e.g. "12/40 duplicates
   resolved") — presentation only in v1, no auto-resolution.
 
@@ -176,15 +181,15 @@ Status legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 ## G. Settings
 
-- [x] **F38 — Settings API**
+- [x] **F39 — Settings API**
   `GET /settings` and `PUT /settings` for global scan settings
   (`ignore_hidden`, `ignore_node_modules`, `max_file_size`,
   `custom_ignore_globs`).
 
-- [x] **F39 — Settings UI page**
+- [x] **F40 — Settings UI page**
   Form for editing global defaults.
 
-- [x] **F40 — Per-scan settings override**
+- [x] **F41 — Per-scan settings override**
   "New Scan" dialog allows overriding global defaults for a single scan;
   override is snapshotted into `scans.settings_snapshot` (JSONB).
 
@@ -192,18 +197,18 @@ Status legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 ## H. Packaging & Polish
 
-- [ ] **F41 — Backend sidecar packaging**
+- [ ] **F42 — Backend sidecar packaging**
   Build the FastAPI backend into a standalone binary (PyInstaller or
   similar) from the venv, for bundling with the Tauri app.
 
-- [ ] **F42 — Postgres connectivity check & setup screen**
+- [ ] **F43 — Postgres connectivity check & setup screen**
   On launch, verify DB connectivity; show a guided setup screen with
   instructions if unreachable.
 
-- [ ] **F43 — Cross-platform build**
+- [ ] **F44 — Cross-platform build**
   Tauri production build/signing for target OS(es).
 
-- [ ] **F44 — Visual polish pass**
+- [ ] **F45 — Visual polish pass**
   Final pass matching the reference UI's spacing, color tokens, and
   card/badge styling across all screens.
 
@@ -211,15 +216,15 @@ Status legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 ## I. Deferred / Stretch (post-v1)
 
-- [x] **F45 — Scan cancellation**
+- [x] **F46 — Scan cancellation**
   Ability to cancel a running scan mid-way via a cancellation flag
   checked between batches.
 
-- [ ] **F46 — Real-time file-system watching**
+- [ ] **F47 — Real-time file-system watching**
   Auto-rescan or live-update on file changes (explicitly out of scope
   for v1 per the PRD).
 
-- [ ] **F47 — SSE/WebSocket-based scan updates**
+- [ ] **F48 — SSE/WebSocket-based scan updates**
   Replace polling with push-based updates — relevant rehearsal for
   RAMPART if pursued.
 

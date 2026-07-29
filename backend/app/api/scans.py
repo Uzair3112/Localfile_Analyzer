@@ -1,10 +1,11 @@
 import asyncio
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
-from sqlalchemy import select, func
+from sqlalchemy import select, func, delete, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db, async_session
@@ -24,6 +25,9 @@ from app.schemas.scan import (
     LargestFoldersResponse,
     LargestFolderItem,
     CleanupSummaryResponse,
+    DuplicateFileDeleteRequest,
+    DuplicateDeleteResponse,
+    DeletedFileInfo,
 )
 from app.scanner.runner import run_scan
 from app.scanner.cancellation import request_cancellation
@@ -219,6 +223,94 @@ async def get_scan_files(
         total=total,
         page=page,
         page_size=page_size,
+    )
+
+
+@router.post("/{scan_id}/duplicates/delete")
+async def delete_duplicate_files(
+    scan_id: int,
+    body: DuplicateFileDeleteRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(Scan).where(Scan.id == scan_id))
+    scan = result.scalar_one_or_none()
+    if not scan:
+        return _error_response("SCAN_NOT_FOUND", f"No scan exists with id {scan_id}", status=404)
+
+    if scan.status != ScanStatus.completed:
+        return _error_response("SCAN_NOT_COMPLETED", "Can only delete files from completed scans")
+
+    if not body.file_ids:
+        return _error_response("EMPTY_REQUEST", "No file IDs provided")
+
+    result = await db.execute(
+        select(ScannedFile).where(
+            ScannedFile.id.in_(body.file_ids),
+            ScannedFile.scan_id == scan_id,
+        )
+    )
+    files_to_delete = result.scalars().all()
+
+    if not files_to_delete:
+        return _error_response("FILES_NOT_FOUND", "None of the provided file IDs were found in this scan")
+
+    deleted_results: list[DeletedFileInfo] = []
+    failed_results: list[DeletedFileInfo] = []
+    successfully_deleted_ids: list[int] = []
+
+    for sf in files_to_delete:
+        try:
+            os.remove(sf.full_path)
+            deleted_results.append(DeletedFileInfo(
+                id=sf.id,
+                filename=sf.filename,
+                full_path=sf.full_path,
+                success=True,
+            ))
+            successfully_deleted_ids.append(sf.id)
+        except FileNotFoundError:
+            deleted_results.append(DeletedFileInfo(
+                id=sf.id,
+                filename=sf.filename,
+                full_path=sf.full_path,
+                success=True,
+                error="File was already deleted from disk",
+            ))
+            successfully_deleted_ids.append(sf.id)
+        except OSError as exc:
+            failed_results.append(DeletedFileInfo(
+                id=sf.id,
+                filename=sf.filename,
+                full_path=sf.full_path,
+                success=False,
+                error=str(exc),
+            ))
+
+    if successfully_deleted_ids:
+        await db.execute(
+            delete(Duplicate).where(
+                Duplicate.scan_id == scan_id,
+                or_(
+                    Duplicate.file1_id.in_(successfully_deleted_ids),
+                    Duplicate.file2_id.in_(successfully_deleted_ids),
+                ),
+            )
+        )
+        await db.execute(
+            delete(ScannedFile).where(ScannedFile.id.in_(successfully_deleted_ids))
+        )
+
+        deleted_size = sum(sf.size for sf in files_to_delete if sf.id in successfully_deleted_ids)
+        scan.total_files = (scan.total_files or 0) - len(successfully_deleted_ids)
+        scan.total_size = (scan.total_size or 0) - deleted_size
+
+        await db.commit()
+
+    return DuplicateDeleteResponse(
+        deleted=deleted_results,
+        failed=failed_results,
+        total_deleted=len(deleted_results),
+        total_failed=len(failed_results),
     )
 
 

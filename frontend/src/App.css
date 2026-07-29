@@ -372,6 +372,42 @@ body {
   cursor: not-allowed;
 }
 
+.btn-cancel {
+  background: transparent;
+  color: var(--color-text-primary, #1A1A1A);
+  border: 1px solid #D1D5DB;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.btn-cancel:hover {
+  background: #F3F4F6;
+}
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: var(--color-card);
+  border-radius: var(--radius-card);
+  padding: 24px;
+  max-width: 480px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
 /* Scans table */
 .scans-table-wrapper {
   overflow-x: auto;
@@ -478,6 +514,14 @@ body {
 
 .file-table-row:hover {
   background-color: var(--color-primary-light);
+}
+
+.file-table-row.selected {
+  background-color: #F0FDF4;
+}
+
+.file-table-row.selected:hover {
+  background-color: #DCFCE7;
 }
 
 .file-table-filename {
